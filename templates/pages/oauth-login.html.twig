@@ -1,0 +1,95 @@
+{# OAuth Login Page #}
+{% extends "pages/abstract/base.html.twig" %}
+
+{% block page_title %}{{ translate('OAUTH.LOGIN.TITLE') }}{% endblock %}
+
+{% block body_classes %}login-page{% endblock %}
+
+{% block body %}
+<div class="login-box">
+    <div class="login-logo">
+        <a href="{{ site.uri.public }}"><b>{{ site.title }}</b></a>
+    </div>
+
+    <div class="card">
+        <div class="card-body login-card-body">
+            <p class="login-box-msg">{{ translate('OAUTH.LOGIN.SUBTITLE') }}</p>
+
+            {# Display alerts #}
+            {% include "components/alerts.html.twig" %}
+
+            {# Standard login form #}
+            <form action="{{ urlFor('login') }}" method="post" id="login-form">
+                <div class="input-group mb-3">
+                    <input type="text" name="username" class="form-control" placeholder="{{ translate('USERNAME') }}" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-user"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="password" name="password" class="form-control" placeholder="{{ translate('PASSWORD') }}" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="icheck-primary">
+                            <input type="checkbox" id="remember" name="remember">
+                            <label for="remember">
+                                {{ translate('REMEMBER_ME') }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-primary btn-block">{{ translate('SIGN_IN') }}</button>
+                    </div>
+                </div>
+            </form>
+
+            {# OAuth login options #}
+            {% if enabledProviders is not empty %}
+            <div class="social-auth-links text-center mb-3 mt-3">
+                <p>- {{ translate('OAUTH.LOGIN.OR') }} -</p>
+                
+                {% if 'google' in enabledProviders %}
+                <a href="{{ urlFor('oauth.redirect', {'provider': 'google'}) }}" class="btn btn-block btn-danger mb-2">
+                    <i class="fab fa-google mr-2"></i> {{ translate('OAUTH.LOGIN.GOOGLE') }}
+                </a>
+                {% endif %}
+                
+                {% if 'facebook' in enabledProviders %}
+                <a href="{{ urlFor('oauth.redirect', {'provider': 'facebook'}) }}" class="btn btn-block btn-primary mb-2">
+                    <i class="fab fa-facebook mr-2"></i> {{ translate('OAUTH.LOGIN.FACEBOOK') }}
+                </a>
+                {% endif %}
+                
+                {% if 'linkedin' in enabledProviders %}
+                <a href="{{ urlFor('oauth.redirect', {'provider': 'linkedin'}) }}" class="btn btn-block btn-info mb-2">
+                    <i class="fab fa-linkedin mr-2"></i> {{ translate('OAUTH.LOGIN.LINKEDIN') }}
+                </a>
+                {% endif %}
+                
+                {% if 'microsoft' in enabledProviders %}
+                <a href="{{ urlFor('oauth.redirect', {'provider': 'microsoft'}) }}" class="btn btn-block btn-secondary mb-2">
+                    <i class="fab fa-microsoft mr-2"></i> {{ translate('OAUTH.LOGIN.MICROSOFT') }}
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {# Additional links #}
+            <p class="mb-1">
+                <a href="{{ urlFor('forgot-password') }}">{{ translate('FORGOT_PASSWORD') }}</a>
+            </p>
+            <p class="mb-0">
+                <a href="{{ urlFor('register') }}" class="text-center">{{ translate('REGISTER_NEW_ACCOUNT') }}</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

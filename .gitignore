@@ -1,0 +1,28 @@
+# Environment files
+.env
+.env.local
+
+# Composer
+vendor/
+composer.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/build/
+/dist/
+
+# Logs
+*.log
+
+# Temporary files
+/tmp/
