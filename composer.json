@@ -1,0 +1,31 @@
+{
+    "name": "ssnukala/sprinkle-oauth",
+    "type": "userfrosting-sprinkle",
+    "description": "OAuth authentication sprinkle for UserFrosting 6, supporting Google, Meta (Facebook, Instagram), Outlook, and LinkedIn",
+    "keywords": ["userfrosting", "sprinkle", "oauth", "authentication", "google", "facebook", "linkedin", "microsoft"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Srinivas Nukala"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "userfrosting/framework": "^5.1",
+        "league/oauth2-client": "^2.7",
+        "league/oauth2-google": "^4.0",
+        "league/oauth2-facebook": "^2.2",
+        "league/oauth2-linkedin": "^4.0",
+        "stevenmaguire/oauth2-microsoft": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "UserFrosting\\Sprinkle\\OAuth\\": "app/src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0-dev"
+        }
+    }
+}

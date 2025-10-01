@@ -1,0 +1,73 @@
+{# OAuth Connections Component - Display and manage user's OAuth connections #}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">{{ translate('OAUTH.CONNECTIONS.TITLE') }}</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">{{ translate('OAUTH.CONNECTIONS.DESCRIPTION') }}</p>
+        
+        {% set providers = ['google', 'facebook', 'linkedin', 'microsoft'] %}
+        {% set providerNames = {
+            'google': 'Google',
+            'facebook': 'Facebook',
+            'linkedin': 'LinkedIn',
+            'microsoft': 'Microsoft'
+        } %}
+        {% set providerIcons = {
+            'google': 'fab fa-google',
+            'facebook': 'fab fa-facebook',
+            'linkedin': 'fab fa-linkedin',
+            'microsoft': 'fab fa-microsoft'
+        } %}
+        
+        <div class="list-group">
+            {% for provider in providers %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="{{ providerIcons[provider] }} fa-lg mr-2"></i>
+                    <strong>{{ providerNames[provider] }}</strong>
+                </div>
+                <div>
+                    {% if userConnections[provider] is defined %}
+                        <span class="badge badge-success">{{ translate('OAUTH.CONNECTIONS.CONNECTED') }}</span>
+                        <button class="btn btn-sm btn-danger ml-2" 
+                                onclick="disconnectOAuth('{{ provider }}')">
+                            {{ translate('OAUTH.CONNECTIONS.DISCONNECT') }}
+                        </button>
+                    {% else %}
+                        <a href="{{ urlFor('oauth.link', {'provider': provider}) }}" 
+                           class="btn btn-sm btn-primary">
+                            {{ translate('OAUTH.CONNECTIONS.CONNECT') }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function disconnectOAuth(provider) {
+    if (confirm('{{ translate('OAUTH.CONNECTIONS.DISCONNECT_CONFIRM') }}')) {
+        // Make AJAX request to disconnect provider
+        fetch('/oauth/disconnect/' + provider, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || '{{ translate('OAUTH.CONNECTIONS.ERROR') }}');
+            }
+        })
+        .catch(error => {
+            alert('{{ translate('OAUTH.CONNECTIONS.ERROR') }}');
+        });
+    }
+}
+</script>
