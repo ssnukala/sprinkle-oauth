@@ -102,15 +102,17 @@ class OAuthController
         $provider = $args['provider'] ?? '';
         $queryParams = $request->getQueryParams();
         
-        // Verify state for CSRF protection
-        $state = $queryParams['state'] ?? '';
-        $storedState = $_SESSION['oauth_state'][$provider] ?? '';
-        
-        if (empty($state) || $state !== $storedState) {
-            $_SESSION['alerts']['danger'][] = 'Invalid OAuth state. Please try again.';
-            return $response
-                ->withHeader('Location', '/login')
-                ->withStatus(302);
+        // Verify state for CSRF protection (skip for Facebook as it uses its own CSRF protection)
+        if ($provider !== 'facebook') {
+            $state = $queryParams['state'] ?? '';
+            $storedState = $_SESSION['oauth_state'][$provider] ?? '';
+            
+            if (empty($state) || $state !== $storedState) {
+                $_SESSION['alerts']['danger'][] = 'Invalid OAuth state. Please try again.';
+                return $response
+                    ->withHeader('Location', '/login')
+                    ->withStatus(302);
+            }
         }
         
         // Clear stored state
@@ -134,23 +136,14 @@ class OAuthController
         }
         
         try {
-            $oauthProvider = $this->oauthService->getProvider($provider);
+            // Get access token using the new service method
+            $tokenData = $this->oauthService->getAccessToken($provider, $code);
             
-            // Get access token
-            $token = $oauthProvider->getAccessToken('authorization_code', [
-                'code' => $code
-            ]);
-            
-            // Get user details
-            $resourceOwner = $oauthProvider->getResourceOwner($token);
-            $providerUserData = $resourceOwner->toArray();
+            // Get user details using the new service method
+            $providerUserData = $this->oauthService->getUserInfo($provider, $tokenData['access_token']);
             
             // Add token data
-            $providerUserData['token'] = [
-                'access_token' => $token->getToken(),
-                'refresh_token' => $token->getRefreshToken(),
-                'expires' => $token->getExpires(),
-            ];
+            $providerUserData['token'] = $tokenData;
             
             // Find or create user
             $result = $this->authService->findOrCreateUser($provider, $providerUserData);

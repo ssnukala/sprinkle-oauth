@@ -2,6 +2,8 @@
 
 OAuth authentication sprinkle for UserFrosting 6, enabling OAuth login using Google, Meta (Facebook, Instagram), Microsoft (Outlook), and LinkedIn.
 
+**Uses Official Vendor SDKs** for better compatibility and up-to-date OAuth implementations.
+
 ## Features
 
 - 🔐 **Multiple OAuth Providers**: Support for Google, Facebook, LinkedIn, and Microsoft
@@ -10,6 +12,7 @@ OAuth authentication sprinkle for UserFrosting 6, enabling OAuth login using Goo
 - 🎨 **Login Screen**: Beautiful login page with OAuth buttons
 - ⚡ **Easy Configuration**: Simple environment-based configuration
 - 🛡️ **Secure**: CSRF protection and secure token handling
+- 📦 **Official SDKs**: Uses official vendor packages for reliability
 
 ## Requirements
 
