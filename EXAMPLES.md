@@ -349,17 +349,21 @@ namespace UserFrosting\Sprinkle\MyApp\ServicesProvider;
 use Psr\Container\ContainerInterface;
 use UserFrosting\Sprinkle\OAuth\Service\OAuthAuthenticationService;
 use UserFrosting\Sprinkle\MyApp\Service\CustomOAuthAuthenticationService;
+use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository;
+use UserFrosting\ServicesProvider\ServicesProviderInterface;
 
 class CustomOAuthServicesProvider implements ServicesProviderInterface
 {
-    public function register(ContainerInterface $container): void
+    public function register(): array
     {
-        // Override default OAuth authentication service
-        $container->set(OAuthAuthenticationService::class, function ($c) {
-            return new CustomOAuthAuthenticationService(
-                $c->get(OAuthConnectionRepository::class)
-            );
-        });
+        return [
+            // Override default OAuth authentication service
+            OAuthAuthenticationService::class => \DI\factory(function (ContainerInterface $c) {
+                return new CustomOAuthAuthenticationService(
+                    $c->get(OAuthConnectionRepository::class)
+                );
+            }),
+        ];
     }
 }
 ```
