@@ -38,11 +38,10 @@ app/
 ├── config/
 │   ├── default.php                         # Default configuration
 │   └── oauth.example.php                   # Configuration examples
-└── locale/en_US/oauth.php                  # Translations
-
-templates/
-├── pages/oauth-login.html.twig            # Login page
-└── components/oauth-connections.html.twig  # Settings component
+├── locale/en_US/oauth.php                  # Translations
+└── templates/
+    ├── pages/oauth-login.html.twig         # Login page
+    └── components/oauth-connections.html.twig  # Settings component
 ```
 
 ### 2. ✅ Create Login Screen with OAuth Options & Auto User Creation
@@ -373,7 +372,7 @@ sprinkle-oauth/
 │       ├── Routes/          # Route definitions
 │       ├── Service/         # Business logic
 │       └── ServicesProvider/ # DI container setup
-├── templates/               # Twig templates
+│   └── templates/           # Twig templates
 ├── *.md                     # Documentation files
 ├── composer.json            # Composer configuration
 ├── LICENSE                  # MIT License
