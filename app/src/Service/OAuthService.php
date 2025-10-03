@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace UserFrosting\Sprinkle\OAuth\Service;
 
 use Google\Client as GoogleClient;
-use Facebook\Facebook;
+use League\OAuth2\Client\Provider\Facebook;
 use Microsoft\Graph\Graph;
 use GuzzleHttp\Client as GuzzleClient;
 
@@ -70,7 +70,7 @@ class OAuthService
     }
 
     /**
-     * Get Facebook SDK
+     * Get Facebook OAuth2 Provider
      *
      * @return Facebook
      * @throws \InvalidArgumentException If provider is not configured
@@ -82,9 +82,10 @@ class OAuthService
         }
 
         return new Facebook([
-            'app_id' => $this->config['facebook']['clientId'],
-            'app_secret' => $this->config['facebook']['clientSecret'],
-            'default_graph_version' => $this->config['facebook']['graphApiVersion'] ?? 'v18.0',
+            'clientId' => $this->config['facebook']['clientId'],
+            'clientSecret' => $this->config['facebook']['clientSecret'],
+            'redirectUri' => $this->baseUrl . '/oauth/facebook/callback',
+            'graphApiVersion' => $this->config['facebook']['graphApiVersion'] ?? 'v18.0',
         ]);
     }
 
@@ -144,10 +145,10 @@ class OAuthService
                 return $client->createAuthUrl();
             
             case 'facebook':
-                $fb = $this->getFacebookClient();
-                $helper = $fb->getRedirectLoginHelper();
-                $redirectUri = $this->baseUrl . '/oauth/facebook/callback';
-                return $helper->getLoginUrl($redirectUri, ['email', 'public_profile']);
+                $provider = $this->getFacebookClient();
+                return $provider->getAuthorizationUrl([
+                    'scope' => ['email', 'public_profile']
+                ]);
             
             case 'microsoft':
                 $config = $this->getMicrosoftConfig();
@@ -215,18 +216,19 @@ class OAuthService
                 ];
             
             case 'facebook':
-                $fb = $this->getFacebookClient();
-                $helper = $fb->getRedirectLoginHelper();
+                $provider = $this->getFacebookClient();
                 
                 try {
-                    $accessToken = $helper->getAccessToken();
+                    $accessToken = $provider->getAccessToken('authorization_code', [
+                        'code' => $code
+                    ]);
                     
                     return [
-                        'access_token' => $accessToken->getValue(),
-                        'refresh_token' => null,
-                        'expires' => $accessToken->getExpiresAt() ? $accessToken->getExpiresAt()->getTimestamp() : null,
+                        'access_token' => $accessToken->getToken(),
+                        'refresh_token' => $accessToken->getRefreshToken(),
+                        'expires' => $accessToken->getExpires(),
                     ];
-                } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+                } catch (\Exception $e) {
                     throw new \Exception('Facebook token exchange failed: ' . $e->getMessage());
                 }
             
@@ -310,11 +312,15 @@ class OAuthService
                 ];
             
             case 'facebook':
-                $fb = $this->getFacebookClient();
+                $provider = $this->getFacebookClient();
                 
                 try {
-                    $response = $fb->get('/me?fields=id,name,email,first_name,last_name,picture', $accessToken);
-                    $user = $response->getGraphUser();
+                    // Create an access token object from the string
+                    $token = new \League\OAuth2\Client\Token\AccessToken([
+                        'access_token' => $accessToken
+                    ]);
+                    
+                    $user = $provider->getResourceOwner($token);
                     
                     return [
                         'id' => $user->getId(),
@@ -322,9 +328,9 @@ class OAuthService
                         'first_name' => $user->getFirstName(),
                         'last_name' => $user->getLastName(),
                         'name' => $user->getName(),
-                        'picture' => $user->getPicture() ? $user->getPicture()->getUrl() : null,
+                        'picture' => $user->getPictureUrl(),
                     ];
-                } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+                } catch (\Exception $e) {
                     throw new \Exception('Facebook user info failed: ' . $e->getMessage());
                 }
             
