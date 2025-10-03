@@ -29,15 +29,17 @@ class OAuthControllerProvider implements ServicesProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function register(ContainerInterface $container): void
+    public function register(): array
     {
-        // OAuth Controller
-        $container->set(OAuthController::class, function (ContainerInterface $c) {
-            return new OAuthController(
-                $c->get(OAuthService::class),
-                $c->get(OAuthAuthenticationService::class),
-                $c->get(Twig::class)
-            );
-        });
+        return [
+            // OAuth Controller
+            OAuthController::class => \DI\factory(function (ContainerInterface $c) {
+                return new OAuthController(
+                    $c->get(OAuthService::class),
+                    $c->get(OAuthAuthenticationService::class),
+                    $c->get(Twig::class)
+                );
+            }),
+        ];
     }
 }

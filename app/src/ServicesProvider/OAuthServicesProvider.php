@@ -28,27 +28,27 @@ class OAuthServicesProvider implements ServicesProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function register(ContainerInterface $container): void
+    public function register(): array
     {
-        // OAuth Connection Repository
-        $container->set(OAuthConnectionRepository::class, function (ContainerInterface $c) {
-            return new OAuthConnectionRepository();
-        });
+        return [
+            // OAuth Connection Repository
+            OAuthConnectionRepository::class => \DI\autowire(OAuthConnectionRepository::class),
 
-        // OAuth Service
-        $container->set(OAuthService::class, function (ContainerInterface $c) {
-            $config = $c->get('config');
-            $oauthConfig = $config['oauth'] ?? [];
-            $baseUrl = $config['site.uri.public'] ?? '';
-            
-            return new OAuthService($oauthConfig, $baseUrl);
-        });
+            // OAuth Service
+            OAuthService::class => \DI\factory(function (ContainerInterface $c) {
+                $config = $c->get('config');
+                $oauthConfig = $config['oauth'] ?? [];
+                $baseUrl = $config['site.uri.public'] ?? '';
+                
+                return new OAuthService($oauthConfig, $baseUrl);
+            }),
 
-        // OAuth Authentication Service
-        $container->set(OAuthAuthenticationService::class, function (ContainerInterface $c) {
-            return new OAuthAuthenticationService(
-                $c->get(OAuthConnectionRepository::class)
-            );
-        });
+            // OAuth Authentication Service
+            OAuthAuthenticationService::class => \DI\factory(function (ContainerInterface $c) {
+                return new OAuthAuthenticationService(
+                    $c->get(OAuthConnectionRepository::class)
+                );
+            }),
+        ];
     }
 }
