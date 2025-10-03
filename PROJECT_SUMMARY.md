@@ -31,6 +31,7 @@ app/
 │   ├── Database/Migrations/                # Database migrations
 │   ├── Entity/OAuthConnection.php          # Eloquent model
 │   ├── Repository/OAuthConnectionRepository.php
+│   ├── Routes/OAuthRoutes.php              # Route definitions
 │   ├── Service/OAuthService.php            # OAuth provider factory
 │   ├── Service/OAuthAuthenticationService.php
 │   └── ServicesProvider/                   # DI container setup
@@ -39,7 +40,6 @@ app/
 │   └── oauth.example.php                   # Configuration examples
 └── locale/en_US/oauth.php                  # Translations
 
-routes/oauth.php                            # Route definitions
 templates/
 ├── pages/oauth-login.html.twig            # Login page
 └── components/oauth-connections.html.twig  # Settings component
@@ -366,7 +366,13 @@ sprinkle-oauth/
 │   ├── config/              # Configuration files
 │   ├── locale/              # Translations
 │   └── src/                 # PHP source code
-├── routes/                  # Route definitions
+│       ├── Controller/      # HTTP controllers
+│       ├── Database/        # Migrations
+│       ├── Entity/          # Database models
+│       ├── Repository/      # Data access layer
+│       ├── Routes/          # Route definitions
+│       ├── Service/         # Business logic
+│       └── ServicesProvider/ # DI container setup
 ├── templates/               # Twig templates
 ├── *.md                     # Documentation files
 ├── composer.json            # Composer configuration

@@ -272,7 +272,7 @@ public function disconnect(
 
 ### Routes
 
-All routes are defined in `routes/oauth.php`:
+All routes are defined in `app/src/Routes/OAuthRoutes.php`:
 
 | Method | Route | Handler | Name | Description |
 |--------|-------|---------|------|-------------|

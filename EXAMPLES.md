@@ -37,17 +37,27 @@ php bakery clear-cache
 
 ### Example 2: Replace Default Login with OAuth Login
 
-**Route Configuration** (`app/routes/custom.php`):
+**Route Configuration** (`app/src/Routes/CustomRoutes.php`):
 ```php
 <?php
+
+declare(strict_types=1);
+
+namespace UserFrosting\Sprinkle\YourSprinkle\Routes;
+
 use Slim\App;
+use UserFrosting\Routes\RouteDefinitionInterface;
 use UserFrosting\Sprinkle\OAuth\Controller\OAuthController;
 
-return function (App $app) {
-    // Override default login route
-    $app->get('/login', [OAuthController::class, 'loginPage'])
-        ->setName('login');
-};
+class CustomRoutes implements RouteDefinitionInterface
+{
+    public function register(App $app): void
+    {
+        // Override default login route
+        $app->get('/login', [OAuthController::class, 'loginPage'])
+            ->setName('login');
+    }
+}
 ```
 
 ### Example 3: Add OAuth Buttons to Existing Login Page
@@ -476,17 +486,28 @@ class OAuthApiController
 }
 ```
 
-**Routes**:
+**Routes** (`app/src/Routes/OAuthApiRoutes.php`):
 ```php
 <?php
-// app/routes/api.php
-return function (App $app) {
-    $app->get('/api/oauth/connections', 
-        [OAuthApiController::class, 'listConnections']);
-    
-    $app->delete('/api/oauth/connections/{provider}', 
-        [OAuthApiController::class, 'deleteConnection']);
-};
+
+declare(strict_types=1);
+
+namespace UserFrosting\Sprinkle\YourSprinkle\Routes;
+
+use Slim\App;
+use UserFrosting\Routes\RouteDefinitionInterface;
+
+class OAuthApiRoutes implements RouteDefinitionInterface
+{
+    public function register(App $app): void
+    {
+        $app->get('/api/oauth/connections', 
+            [OAuthApiController::class, 'listConnections']);
+        
+        $app->delete('/api/oauth/connections/{provider}', 
+            [OAuthApiController::class, 'deleteConnection']);
+    }
+}
 ```
 
 ---
