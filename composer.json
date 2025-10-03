@@ -13,7 +13,7 @@
         "userfrosting/sprinkle-core": "^6.0",
         "php": "^8.1",
         "google/apiclient": "^2.15",
-        "facebook/graph-sdk": "^5.7",
+        "league/oauth2-facebook": "^2.2",
         "microsoft/microsoft-graph": "^2.0",
         "guzzlehttp/guzzle": "^7.8"
     },
@@ -22,6 +22,8 @@
             "UserFrosting\\Sprinkle\\OAuth\\": "app/src/"
         }
     },
+    "minimum-stability": "alpha",
+    "prefer-stable": true,
     "extra": {
         "branch-alias": {
             "dev-main": "1.0-dev"

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-01-XX
+
+### Fixed
+- **CRITICAL**: Fixed PHP 8.x compatibility issue by reverting Facebook OAuth from abandoned `facebook/graph-sdk` to maintained `league/oauth2-facebook`
+  - `facebook/graph-sdk` v5.7 requires PHP ^5.4|^7.0 which is incompatible with PHP 8.x
+  - `league/oauth2-facebook` v2.2 requires PHP >=7.3 and supports PHP 8.x
+  - The `facebook/graph-sdk` package is officially abandoned by Facebook
+- Updated OAuthService to use League OAuth2 client for Facebook authentication
+- Added `minimum-stability: alpha` and `prefer-stable: true` to composer.json for UserFrosting 6 beta compatibility
+
+### Changed
+- Reverted Facebook OAuth implementation from `facebook/graph-sdk` back to `league/oauth2-facebook` for better PHP 8.x support and active maintenance
+
 ## [1.1.0] - 2024-10-01
 
 ### Changed
@@ -46,5 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unique constraints to prevent duplicate connections
 - Foreign key constraints for data integrity
 
+[1.1.1]: https://github.com/ssnukala/sprinkle-oauth/releases/tag/v1.1.1
 [1.1.0]: https://github.com/ssnukala/sprinkle-oauth/releases/tag/v1.1.0
 [1.0.0]: https://github.com/ssnukala/sprinkle-oauth/releases/tag/v1.0.0
