@@ -170,7 +170,7 @@ Clear your browser cookies and try again.
 ## Features & Functionality
 
 ### Q: Can I customize the login page design?
-**A:** Yes! Copy `templates/pages/oauth-login.html.twig` to your app sprinkle and modify it.
+**A:** Yes! Copy `app/templates/pages/oauth-login.html.twig` to your app sprinkle and modify it.
 
 ### Q: Can I get the user's profile picture from OAuth?
 **A:** Yes! Profile pictures are stored in the `user_data` JSON field of `oauth_connections` table. See EXAMPLES.md for code samples.

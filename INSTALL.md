@@ -342,7 +342,7 @@ UF_MODE=debug
 
 After successful installation:
 
-1. **Customize Templates**: Modify `templates/pages/oauth-login.html.twig` to match your design
+1. **Customize Templates**: Modify `app/templates/pages/oauth-login.html.twig` to match your design
 2. **Add to Navigation**: Link to `/oauth/login` from your navigation menu
 3. **User Settings**: Include OAuth connections component in user profile/settings page
 4. **Test All Providers**: Verify each configured provider works correctly

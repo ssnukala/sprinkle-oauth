@@ -14,6 +14,7 @@ namespace UserFrosting\Sprinkle\OAuth;
 
 use UserFrosting\Sprinkle\Core\Core;
 use UserFrosting\Sprinkle\SprinkleRecipe;
+use UserFrosting\Sprinkle\OAuth\Routes\OAuthRoutes;
 use UserFrosting\Sprinkle\OAuth\ServicesProvider\OAuthServicesProvider;
 use UserFrosting\Sprinkle\OAuth\ServicesProvider\OAuthControllerProvider;
 
@@ -41,16 +42,16 @@ class OAuth implements SprinkleRecipe
      */
     public function getPath(): string
     {
-        return __DIR__ . '/../..';
+        return __DIR__ . '/../';
     }
 
     /**
-     * Returns routes definition files
+     * Returns routes definition classes
      */
     public function getRoutes(): array
     {
         return [
-            'routes/oauth.php',
+            OAuthRoutes::class,
         ];
     }
 

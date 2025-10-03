@@ -272,7 +272,7 @@ public function disconnect(
 
 ### Routes
 
-All routes are defined in `routes/oauth.php`:
+All routes are defined in `app/src/Routes/OAuthRoutes.php`:
 
 | Method | Route | Handler | Name | Description |
 |--------|-------|---------|------|-------------|
@@ -317,7 +317,7 @@ Registers controllers in the DI container.
 
 Login page with OAuth provider buttons.
 
-**Location**: `templates/pages/oauth-login.html.twig`
+**Location**: `app/templates/pages/oauth-login.html.twig`
 
 **Variables**:
 - `enabledProviders` (array): List of enabled provider names
@@ -331,7 +331,7 @@ Login page with OAuth provider buttons.
 
 Component for managing OAuth connections in user settings.
 
-**Location**: `templates/components/oauth-connections.html.twig`
+**Location**: `app/templates/components/oauth-connections.html.twig`
 
 **Variables**:
 - `userConnections` (array): User's current OAuth connections indexed by provider
