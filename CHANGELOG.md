@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Reverted Facebook OAuth implementation from `facebook/graph-sdk` back to `league/oauth2-facebook` for better PHP 8.x support and active maintenance
+- **ARCHITECTURE**: Restructured folder organization to align with UserFrosting 6 conventions
+  - Moved `Entity/` to `Database/Models/` to match pattern used in `userfrosting/sprinkle-core` and `userfrosting/sprinkle-admin`
+  - Updated namespace from `UserFrosting\Sprinkle\OAuth\Entity` to `UserFrosting\Sprinkle\OAuth\Database\Models`
+  - All imports and references updated accordingly
+  - Documentation updated to reflect new structure
+- Added comprehensive documentation on extending UserFrosting patterns (similar to PDOStorage pattern)
+
+### Documentation
+- Added "Extending UserFrosting Core Patterns" section to API.md
+- Included examples of extending models, services, and repositories
+- Documented folder structure conventions matching UserFrosting 6
 
 ## [1.1.0] - 2024-10-01
 

@@ -510,6 +510,161 @@ Override in configuration:
 ]
 ```
 
+### Extending UserFrosting Core Patterns
+
+This OAuth sprinkle follows UserFrosting 6 conventions for structure and extensibility. You can extend it similar to how you would extend core UserFrosting components.
+
+#### Folder Structure Convention
+
+The sprinkle follows the standard UserFrosting 6 pattern:
+
+```
+app/src/
+├── Controller/          # HTTP controllers
+├── Database/
+│   ├── Migrations/      # Database migrations
+│   └── Models/          # Eloquent models (formerly Entity)
+├── Repository/          # Data access layer
+├── Routes/              # Route definitions
+├── Service/             # Business logic services
+└── ServicesProvider/    # Dependency injection configuration
+```
+
+This matches the pattern used in `userfrosting/sprinkle-core` and `userfrosting/sprinkle-admin`.
+
+#### Extending Models (Like PDOStorage Pattern)
+
+Similar to how UserFrosting Account sprinkle provides extendable classes like `UserFrosting\Sprinkle\Account\Rememberme\PDOStorage`, you can extend OAuth models and services:
+
+**Example: Extending OAuthConnection Model**
+
+```php
+<?php
+namespace UserFrosting\Sprinkle\YourSprinkle\Database\Models;
+
+use UserFrosting\Sprinkle\OAuth\Database\Models\OAuthConnection as BaseOAuthConnection;
+
+class CustomOAuthConnection extends BaseOAuthConnection
+{
+    // Add custom attributes
+    protected $fillable = [
+        ...parent::$fillable,
+        'custom_field',
+    ];
+    
+    // Add custom methods
+    public function isTokenExpired(): bool
+    {
+        return $this->expires_at < now();
+    }
+    
+    // Override relationship if needed
+    public function user()
+    {
+        return $this->belongsTo(CustomUser::class, 'user_id');
+    }
+}
+```
+
+**Example: Extending OAuthService**
+
+```php
+<?php
+namespace UserFrosting\Sprinkle\YourSprinkle\Service;
+
+use UserFrosting\Sprinkle\OAuth\Service\OAuthService as BaseOAuthService;
+
+class CustomOAuthService extends BaseOAuthService
+{
+    /**
+     * Add custom provider support
+     */
+    public function getGitHubClient(): GitHub
+    {
+        // Add GitHub support
+    }
+    
+    /**
+     * Override to add custom behavior
+     */
+    public function getAuthorizationUrl(string $providerName): string
+    {
+        // Add custom logic before calling parent
+        $url = parent::getAuthorizationUrl($providerName);
+        
+        // Add custom parameters
+        return $url . '&custom_param=value';
+    }
+}
+```
+
+**Example: Extending Repository Pattern**
+
+```php
+<?php
+namespace UserFrosting\Sprinkle\YourSprinkle\Repository;
+
+use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository as BaseRepository;
+
+class CustomOAuthConnectionRepository extends BaseRepository
+{
+    /**
+     * Add custom query methods
+     */
+    public function findExpiredTokens(): Collection
+    {
+        return OAuthConnection::where('expires_at', '<', now())->get();
+    }
+    
+    /**
+     * Add complex queries
+     */
+    public function getUsersWithMultipleProviders(): Collection
+    {
+        return OAuthConnection::selectRaw('user_id, COUNT(*) as provider_count')
+            ->groupBy('user_id')
+            ->having('provider_count', '>', 1)
+            ->get();
+    }
+}
+```
+
+**Registering Extended Classes in DI Container**
+
+```php
+<?php
+namespace UserFrosting\Sprinkle\YourSprinkle\ServicesProvider;
+
+use UserFrosting\ServicesProvider\ServicesProviderInterface;
+
+class CustomOAuthServicesProvider implements ServicesProviderInterface
+{
+    public function register(): array
+    {
+        return [
+            // Override OAuth service with custom implementation
+            OAuthService::class => function (ContainerInterface $c) {
+                return new CustomOAuthService(
+                    $c->get(Config::class),
+                    $c->get('settings')['site']['uri']['public']
+                );
+            },
+            
+            // Override repository
+            OAuthConnectionRepository::class => function (ContainerInterface $c) {
+                return new CustomOAuthConnectionRepository();
+            },
+        ];
+    }
+}
+```
+
+This extensibility pattern is consistent with UserFrosting's architecture, allowing you to:
+- Extend models to add custom fields and methods
+- Override services to change behavior
+- Add custom repositories for complex queries
+- Replace default implementations via dependency injection
+
 ---
 
 ## Version Information
