@@ -8,32 +8,42 @@ The OAuth sprinkle follows the standard UserFrosting 6 folder structure, consist
 
 ```
 app/
-├── config/                  # Configuration files
-│   ├── default.php         # Default OAuth configuration
-│   └── oauth.example.php   # Example configuration
-├── locale/                  # Translations/i18n
+├── assets/                   # Frontend assets (Vue.js)
+│   ├── js/
+│   │   ├── components/       # Vue components
+│   │   ├── pages/            # Vue page components
+│   │   └── main.js          # Entry point
+│   ├── css/                  # Stylesheets
+│   ├── package.json         # Node dependencies
+│   ├── vite.config.js       # Build configuration
+│   └── README.md            # Assets documentation
+├── config/                   # Configuration files
+│   ├── default.php          # Default OAuth configuration
+│   └── oauth.example.php    # Example configuration
+├── locale/                   # Translations/i18n
 │   └── en_US/
-│       └── oauth.php       # English translations
-├── src/                     # PHP source code
-│   ├── Controller/          # HTTP controllers
+│       └── oauth.php        # English translations
+├── src/                      # PHP source code
+│   ├── Authenticator/        # OAuth authentication logic
+│   │   └── OAuthAuthenticator.php
+│   ├── Controller/           # HTTP controllers
 │   │   └── OAuthController.php
-│   ├── Database/            # Database layer
-│   │   ├── Migrations/      # Database migrations
+│   ├── Database/             # Database layer
+│   │   ├── Migrations/       # Database migrations
 │   │   │   └── CreateOAuthConnectionsTable.php
-│   │   └── Models/          # Eloquent models (Entities)
+│   │   └── Models/           # Eloquent models
 │   │       └── OAuthConnection.php
-│   ├── Repository/          # Data access layer (Repository pattern)
+│   ├── Factory/              # Factory classes
+│   │   └── OAuthProviderFactory.php
+│   ├── Repository/           # Data access layer
 │   │   └── OAuthConnectionRepository.php
-│   ├── Routes/              # Route definitions
+│   ├── Routes/               # Route definitions
 │   │   └── OAuthRoutes.php
-│   ├── Service/             # Business logic services
-│   │   ├── OAuthService.php
-│   │   └── OAuthAuthenticationService.php
-│   ├── ServicesProvider/    # Dependency injection configuration
+│   ├── ServicesProvider/     # Dependency injection configuration
 │   │   ├── OAuthServicesProvider.php
 │   │   └── OAuthControllerProvider.php
-│   └── OAuth.php           # Main sprinkle class
-└── templates/               # Twig templates
+│   └── OAuth.php            # Main sprinkle class
+└── templates/                # Twig templates (legacy, being replaced by Vue)
     ├── pages/
     │   └── oauth-login.html.twig
     └── components/
@@ -91,23 +101,63 @@ class OAuthConnectionRepository
 }
 ```
 
-### 3. Service Pattern
+### 3. Factory Pattern
 
-Business logic is encapsulated in service classes:
+Factory classes create and configure OAuth provider instances:
 
 ```php
-UserFrosting\Sprinkle\OAuth\Service\OAuthService
-UserFrosting\Sprinkle\OAuth\Service\OAuthAuthenticationService
+UserFrosting\Sprinkle\OAuth\Factory\OAuthProviderFactory
 ```
 
-**Services handle:**
-- OAuth provider configuration
-- Token exchange
-- User information retrieval
-- User creation and linking logic
+**Responsibilities:**
+- Create OAuth provider client instances (Google, Facebook, etc.)
+- Configure provider settings
+- Generate authorization URLs
+- Exchange codes for tokens
+- Fetch user information
 
 **Example:**
 ```php
+class OAuthProviderFactory
+{
+    public function getGoogleClient(): GoogleClient
+    {
+        $client = new GoogleClient();
+        $client->setClientId($this->config['google']['clientId']);
+        $client->setClientSecret($this->config['google']['clientSecret']);
+        $client->setRedirectUri($this->baseUrl . '/oauth/google/callback');
+        return $client;
+    }
+}
+```
+
+### 4. Authenticator Pattern
+
+Authenticator classes handle OAuth authentication and user management:
+
+```php
+UserFrosting\Sprinkle\OAuth\Authenticator\OAuthAuthenticator
+```
+
+**Responsibilities:**
+- Find or create users from OAuth data
+- Link OAuth providers to existing users
+- Manage OAuth connections
+- Extract user data from providers
+
+**Example:**
+```php
+class OAuthAuthenticator
+{
+    public function findOrCreateUser(string $provider, array $providerUserData): array
+    {
+        // Check if OAuth connection exists
+        // If not, check if user exists by email
+        // If not, create new user
+        // Link OAuth connection
+    }
+}
+```
 class OAuthService
 {
     public function getAuthorizationUrl(string $provider): string
@@ -170,14 +220,62 @@ class OAuthServicesProvider implements ServicesProviderInterface
     public function register(): array
     {
         return [
-            OAuthService::class => function (ContainerInterface $c) {
-                return new OAuthService(
+            OAuthProviderFactory::class => function (ContainerInterface $c) {
+                return new OAuthProviderFactory(
                     $c->get(Config::class),
                     $c->get('settings')['site']['uri']['public']
                 );
             },
+            OAuthAuthenticator::class => \DI\autowire(),
         ];
     }
+}
+```
+
+### 6. Vue.js Frontend Assets
+
+Following the UserFrosting Admin sprinkle pattern, frontend assets are built with Vue.js and Vite:
+
+**Structure:**
+```
+app/assets/
+├── js/
+│   ├── components/          # Reusable Vue components
+│   │   └── OAuthConnectionsComponent.vue
+│   ├── pages/               # Full-page components
+│   │   └── OAuthLoginPage.vue
+│   └── main.js             # Entry point
+├── package.json            # Node dependencies
+└── vite.config.js          # Build configuration
+```
+
+**Key Components:**
+
+**OAuthLoginPage.vue** - Full OAuth login page with:
+- Traditional username/password form
+- OAuth provider buttons (Google, Facebook, LinkedIn, Microsoft)
+- Responsive design
+- Integrated alerts
+
+**OAuthConnectionsComponent.vue** - Manage OAuth connections:
+- Display connected providers
+- Connect new providers
+- Disconnect existing providers
+- Real-time updates
+
+**Build System:**
+- Uses Vite for fast development and optimized builds
+- Vue 3 with Composition API
+- ES6+ modules
+- Asset optimization and code splitting
+
+**Development:**
+```bash
+cd app/assets
+npm install
+npm run dev      # Development server
+npm run build    # Production build
+```
 }
 ```
 
@@ -301,7 +399,9 @@ ssnukala/sprinkle-oauth/
 5. **Readability**: Predictable file locations
 6. **Scalability**: Easy to add new features
 
-## Migration from Entity to Database/Models
+## Migration Guide
+
+### From Entity to Database/Models (v1.1.1)
 
 Previous versions used `Entity/` namespace. This has been updated to `Database/Models/` for consistency:
 
@@ -325,13 +425,54 @@ use UserFrosting\Sprinkle\OAuth\Entity\OAuthConnection;
 use UserFrosting\Sprinkle\OAuth\Database\Models\OAuthConnection;
 ```
 
+### From Service to Factory/Authenticator (v1.2.0)
+
+The `Service/` folder has been refactored to follow UserFrosting 6 patterns:
+
+**Before:**
+```php
+use UserFrosting\Sprinkle\OAuth\Service\OAuthService;
+use UserFrosting\Sprinkle\OAuth\Service\OAuthAuthenticationService;
+```
+
+**After:**
+```php
+use UserFrosting\Sprinkle\OAuth\Factory\OAuthProviderFactory;
+use UserFrosting\Sprinkle\OAuth\Authenticator\OAuthAuthenticator;
+```
+
+**Why this change?**
+- `Service/` folder is not consistent with UserFrosting 6 core sprinkles
+- `Factory` pattern better describes OAuth provider creation
+- `Authenticator` pattern better describes authentication logic
+- Aligns with UserFrosting architecture patterns
+
+### Twig to Vue Migration (v1.2.0)
+
+Frontend is transitioning from Twig templates to Vue.js components:
+
+**Legacy (Twig):**
+- `app/templates/pages/oauth-login.html.twig`
+- `app/templates/components/oauth-connections.html.twig`
+
+**New (Vue.js):**
+- `app/assets/js/pages/OAuthLoginPage.vue`
+- `app/assets/js/components/OAuthConnectionsComponent.vue`
+
+**Benefits:**
+- Modern reactive UI
+- Better separation of concerns
+- Reusable components
+- Following UserFrosting Admin pattern
+
 ## Best Practices
 
-1. **Keep Controllers Thin**: Business logic belongs in services
+1. **Keep Controllers Thin**: Business logic belongs in Factories and Authenticators
 2. **Use Repositories**: Abstract database queries
 3. **Follow Namespace Conventions**: Match UserFrosting patterns
 4. **Extend, Don't Modify**: Use inheritance and DI for customization
 5. **Document Extensions**: Keep track of customizations
+6. **Use Vue for UI**: Build reactive components for better UX
 
 ## References
 
@@ -339,4 +480,6 @@ use UserFrosting\Sprinkle\OAuth\Database\Models\OAuthConnection;
 - [UserFrosting Sprinkles](https://github.com/userfrosting)
 - [PSR-4 Autoloading](https://www.php-fig.org/psr/psr-4/)
 - [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
-- [Service Layer Pattern](https://martinfowler.com/eaaCatalog/serviceLayer.html)
+- [Factory Pattern](https://refactoring.guru/design-patterns/factory-method)
+- [Vue.js Documentation](https://vuejs.org/)
+- [Vite Documentation](https://vitejs.dev/)
