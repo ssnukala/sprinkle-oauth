@@ -16,6 +16,7 @@ use Google\Client as GoogleClient;
 use League\OAuth2\Client\Provider\Facebook;
 use Microsoft\Graph\Graph;
 use GuzzleHttp\Client as GuzzleClient;
+use UserFrosting\Config\Config;
 
 /**
  * OAuth Service
@@ -37,12 +38,12 @@ class OAuthService
     /**
      * Constructor
      *
-     * @param array $config OAuth configuration
+     * @param Config $config Configuration instance
      * @param string $baseUrl Base URL for the application
      */
-    public function __construct(array $config, string $baseUrl)
+    public function __construct(Config $config, string $baseUrl)
     {
-        $this->config = $config;
+        $this->config = $config->get('oauth', []);
         $this->baseUrl = rtrim($baseUrl, '/');
     }
 

@@ -12,12 +12,8 @@ declare(strict_types=1);
 
 namespace UserFrosting\Sprinkle\OAuth\ServicesProvider;
 
-use Psr\Container\ContainerInterface;
 use UserFrosting\Sprinkle\OAuth\Controller\OAuthController;
-use UserFrosting\Sprinkle\OAuth\Service\OAuthService;
-use UserFrosting\Sprinkle\OAuth\Service\OAuthAuthenticationService;
 use UserFrosting\ServicesProvider\ServicesProviderInterface;
-use Slim\Views\Twig;
 
 /**
  * OAuth Controller Provider
@@ -33,13 +29,7 @@ class OAuthControllerProvider implements ServicesProviderInterface
     {
         return [
             // OAuth Controller
-            OAuthController::class => \DI\factory(function (ContainerInterface $c) {
-                return new OAuthController(
-                    $c->get(OAuthService::class),
-                    $c->get(OAuthAuthenticationService::class),
-                    $c->get(Twig::class)
-                );
-            }),
+            OAuthController::class => \DI\autowire(),
         ];
     }
 }

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace UserFrosting\Sprinkle\OAuth\ServicesProvider;
 
-use Psr\Container\ContainerInterface;
+use UserFrosting\Config\Config;
 use UserFrosting\Sprinkle\OAuth\Service\OAuthService;
 use UserFrosting\Sprinkle\OAuth\Service\OAuthAuthenticationService;
 use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository;
@@ -32,23 +32,15 @@ class OAuthServicesProvider implements ServicesProviderInterface
     {
         return [
             // OAuth Connection Repository
-            OAuthConnectionRepository::class => \DI\autowire(OAuthConnectionRepository::class),
+            OAuthConnectionRepository::class => \DI\autowire(),
 
             // OAuth Service
-            OAuthService::class => \DI\factory(function (ContainerInterface $c) {
-                $config = $c->get('config');
-                $oauthConfig = $config['oauth'] ?? [];
-                $baseUrl = $config['site.uri.public'] ?? '';
-                
-                return new OAuthService($oauthConfig, $baseUrl);
-            }),
+            OAuthService::class => \DI\autowire()
+                ->constructorParameter('config', \DI\get(Config::class))
+                ->constructorParameter('baseUrl', \DI\string('{site.uri.public}')),
 
             // OAuth Authentication Service
-            OAuthAuthenticationService::class => \DI\factory(function (ContainerInterface $c) {
-                return new OAuthAuthenticationService(
-                    $c->get(OAuthConnectionRepository::class)
-                );
-            }),
+            OAuthAuthenticationService::class => \DI\autowire(),
         ];
     }
 }
