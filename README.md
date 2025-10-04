@@ -167,7 +167,7 @@ This sprinkle includes Vue.js components and TypeScript assets that are deployed
 #### For End Users
 
 When you install this sprinkle via Composer in your UserFrosting app:
-1. The frontend assets are automatically available in `node_modules/@userfrosting/sprinkle-oauth`
+1. The frontend assets are automatically available in `node_modules/@ssnukala/sprinkle-oauth`
 2. Your app's Vite build process will compile these assets along with other sprinkle assets
 3. No additional configuration is needed - assets are consumed as TypeScript source files
 
@@ -193,17 +193,17 @@ The package exports multiple entry points that can be imported in a UserFrosting
 
 ```typescript
 // Import the full plugin
-import OAuthSprinkle from '@userfrosting/sprinkle-oauth'
+import OAuthSprinkle from '@ssnukala/sprinkle-oauth'
 
 // Import individual components
-import { OAuthLoginView } from '@userfrosting/sprinkle-oauth/views'
-import { OAuthConnections } from '@userfrosting/sprinkle-oauth/components'
+import { OAuthLoginView } from '@ssnukala/sprinkle-oauth/views'
+import { OAuthConnections } from '@ssnukala/sprinkle-oauth/components'
 
 // Import composables
-import { useOAuth } from '@userfrosting/sprinkle-oauth/composables'
+import { useOAuth } from '@ssnukala/sprinkle-oauth/composables'
 
 // Import routes
-import { oauthRoutes } from '@userfrosting/sprinkle-oauth/routes'
+import { oauthRoutes } from '@ssnukala/sprinkle-oauth/routes'
 ```
 
 See [app/assets/README.md](app/assets/README.md) for detailed frontend documentation.

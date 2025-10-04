@@ -57,7 +57,7 @@ You should see output confirming the migration was successful.
 
 If your UserFrosting app uses Vue.js and you want to use the OAuth sprinkle's frontend components, the assets are automatically available after installation. 
 
-The sprinkle publishes its frontend assets to npm as `@userfrosting/sprinkle-oauth`, and they will be available in `node_modules` when you run:
+The sprinkle publishes its frontend assets to npm as `@ssnukala/sprinkle-oauth`, and they will be available in `node_modules` when you run:
 
 ```bash
 npm install
@@ -68,7 +68,7 @@ Your app's build process (Vite) will automatically compile these assets along wi
 To verify the package is available:
 
 ```bash
-npm list @userfrosting/sprinkle-oauth
+npm list @ssnukala/sprinkle-oauth
 ```
 
 ## OAuth Provider Setup

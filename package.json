@@ -1,5 +1,5 @@
 {
-    "name": "@userfrosting/sprinkle-oauth",
+    "name": "@ssnukala/sprinkle-oauth",
     "version": "1.0.0",
     "type": "module",
     "description": "OAuth Sprinkle for UserFrosting 6",

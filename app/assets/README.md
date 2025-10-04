@@ -92,9 +92,9 @@ The sprinkle uses TypeScript for type safety and better developer experience, co
 The package exports multiple entry points:
 
 ```typescript
-import OAuthSprinkle from '@userfrosting/sprinkle-oauth'
-import { OAuthLoginView } from '@userfrosting/sprinkle-oauth/views'
-import { OAuthConnections } from '@userfrosting/sprinkle-oauth/components'
+import OAuthSprinkle from '@ssnukala/sprinkle-oauth'
+import { OAuthLoginView } from '@ssnukala/sprinkle-oauth/views'
+import { OAuthConnections } from '@ssnukala/sprinkle-oauth/components'
 ```
 
 ## Development
@@ -124,7 +124,7 @@ The OAuth sprinkle can be imported and used as a Vue plugin:
 
 ```typescript
 import { createApp } from 'vue'
-import OAuthSprinkle from '@userfrosting/sprinkle-oauth'
+import OAuthSprinkle from '@ssnukala/sprinkle-oauth'
 
 const app = createApp(App)
 app.use(OAuthSprinkle)
@@ -141,7 +141,7 @@ app.use(OAuthSprinkle)
 </template>
 
 <script setup lang="ts">
-import { OAuthLoginView } from '@userfrosting/sprinkle-oauth/views'
+import { OAuthLoginView } from '@ssnukala/sprinkle-oauth/views'
 
 const config = {
     siteTitle: 'My App',
@@ -161,7 +161,7 @@ const config = {
 </template>
 
 <script setup lang="ts">
-import { OAuthConnections } from '@userfrosting/sprinkle-oauth/components'
+import { OAuthConnections } from '@ssnukala/sprinkle-oauth/components'
 
 const userConnections = {
     google: { /* connection data */ },
