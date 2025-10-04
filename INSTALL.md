@@ -53,6 +53,24 @@ php bakery migrate
 
 You should see output confirming the migration was successful.
 
+### Step 4: Install Frontend Assets (If Using Vue Components)
+
+If your UserFrosting app uses Vue.js and you want to use the OAuth sprinkle's frontend components, the assets are automatically available after installation. 
+
+The sprinkle publishes its frontend assets to npm as `@ssnukala/sprinkle-oauth`, and they will be available in `node_modules` when you run:
+
+```bash
+npm install
+```
+
+Your app's build process (Vite) will automatically compile these assets along with other sprinkle assets. No additional configuration is needed.
+
+To verify the package is available:
+
+```bash
+npm list @ssnukala/sprinkle-oauth
+```
+
 ## OAuth Provider Setup
 
 ### Google OAuth Setup

@@ -283,8 +283,8 @@ app/assets/
 
 **Package Structure:**
 - Uses `exports` field in package.json for modular imports
-- Can import individual components: `@userfrosting/sprinkle-oauth/views`
-- Plugin architecture: `import OAuthSprinkle from '@userfrosting/sprinkle-oauth'`
+- Can import individual components: `@ssnukala/sprinkle-oauth/views`
+- Plugin architecture: `import OAuthSprinkle from '@ssnukala/sprinkle-oauth'`
 
 **Build System:**
 - TypeScript for type safety
