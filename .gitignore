@@ -26,3 +26,10 @@ Thumbs.db
 
 # Temporary files
 /tmp/
+
+# Node.js / Frontend assets
+app/assets/node_modules/
+app/assets/package-lock.json
+app/assets/yarn.lock
+app/assets/dist/
+app/public/assets/oauth/

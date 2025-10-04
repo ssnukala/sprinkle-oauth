@@ -28,8 +28,9 @@ app/
 ├── src/
 │   ├── OAuth.php                           # Main sprinkle class
 │   ├── Controller/OAuthController.php      # HTTP controller
-│   ├── Database/Migrations/                # Database migrations
-│   ├── Entity/OAuthConnection.php          # Eloquent model
+│   ├── Database/
+│   │   ├── Migrations/                     # Database migrations
+│   │   └── Models/OAuthConnection.php      # Eloquent model
 │   ├── Repository/OAuthConnectionRepository.php
 │   ├── Routes/OAuthRoutes.php              # Route definitions
 │   ├── Service/OAuthService.php            # OAuth provider factory
@@ -136,7 +137,7 @@ Created `oauth_connections` table with:
    - Find by user, provider, or combination
    - Create, update, delete connections
 
-5. **OAuth Connection Entity** (`OAuthConnection`)
+5. **OAuth Connection Model** (`OAuthConnection`)
    - Eloquent model
    - Stores tokens and user data
    - Relationship to User model
@@ -366,8 +367,9 @@ sprinkle-oauth/
 │   ├── locale/              # Translations
 │   └── src/                 # PHP source code
 │       ├── Controller/      # HTTP controllers
-│       ├── Database/        # Migrations
-│       ├── Entity/          # Database models
+│       ├── Database/        # Database layer
+│       │   ├── Migrations/  # Database migrations
+│       │   └── Models/      # Eloquent models
 │       ├── Repository/      # Data access layer
 │       ├── Routes/          # Route definitions
 │       ├── Service/         # Business logic
