@@ -43,12 +43,38 @@ We welcome feature suggestions! Please open an issue with:
 git clone https://github.com/yourusername/sprinkle-oauth.git
 cd sprinkle-oauth
 
-# Install dependencies
+# Install PHP dependencies
 composer install
+
+# Install Node.js dependencies (for frontend assets)
+npm install
 
 # Create a feature branch
 git checkout -b feature/your-feature-name
 ```
+
+#### Frontend Development
+
+If you're working on Vue.js components or TypeScript assets:
+
+```bash
+# Run type checking
+npm run typecheck
+
+# Build the library
+npm run build
+
+# Start development server (if you create a dev entry point)
+npm run dev
+```
+
+The frontend assets follow UserFrosting 6 Admin Sprinkle patterns:
+- TypeScript with strict type checking
+- Vue 3 Composition API with `<script setup>`
+- Modular exports via package.json
+- Built with Vite
+
+See [app/assets/README.md](app/assets/README.md) for detailed frontend documentation.
 
 #### Code Guidelines
 

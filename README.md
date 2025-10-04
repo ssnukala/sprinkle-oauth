@@ -160,6 +160,54 @@ The sprinkle creates an `oauth_connections` table:
 
 ## Architecture
 
+### Frontend Assets
+
+This sprinkle includes Vue.js components and TypeScript assets that are deployed to `node_modules` when installed via npm, following the UserFrosting 6 Admin Sprinkle pattern.
+
+#### For End Users
+
+When you install this sprinkle via Composer in your UserFrosting app:
+1. The frontend assets are automatically available in `node_modules/@userfrosting/sprinkle-oauth`
+2. Your app's Vite build process will compile these assets along with other sprinkle assets
+3. No additional configuration is needed - assets are consumed as TypeScript source files
+
+#### For Sprinkle Developers
+
+To develop the frontend assets within this sprinkle:
+
+```bash
+# Install dependencies
+npm install
+
+# Run type checking
+npm run typecheck
+
+# Build the library (for testing)
+npm run build
+
+# Start development server (if you create a dev entry point)
+npm run dev
+```
+
+The package exports multiple entry points that can be imported in a UserFrosting app:
+
+```typescript
+// Import the full plugin
+import OAuthSprinkle from '@userfrosting/sprinkle-oauth'
+
+// Import individual components
+import { OAuthLoginView } from '@userfrosting/sprinkle-oauth/views'
+import { OAuthConnections } from '@userfrosting/sprinkle-oauth/components'
+
+// Import composables
+import { useOAuth } from '@userfrosting/sprinkle-oauth/composables'
+
+// Import routes
+import { oauthRoutes } from '@userfrosting/sprinkle-oauth/routes'
+```
+
+See [app/assets/README.md](app/assets/README.md) for detailed frontend documentation.
+
 ### Key Components
 
 - **Model**: `OAuthConnection` - Eloquent model for OAuth connections (in `Database/Models`)
