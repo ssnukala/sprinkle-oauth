@@ -62,7 +62,7 @@ class OAuthProviderFactory
         $client = new GoogleClient();
         $client->setClientId($this->config['google']['clientId']);
         $client->setClientSecret($this->config['google']['clientSecret']);
-        $client->setRedirectUri($this->baseUrl . '/oauth/google/callback');
+        $client->setRedirectUri($this->baseUrl . '/api/oauth/google/callback');
         $client->addScope('email');
         $client->addScope('profile');
         $client->addScope('openid');
@@ -85,7 +85,7 @@ class OAuthProviderFactory
         return new Facebook([
             'clientId' => $this->config['facebook']['clientId'],
             'clientSecret' => $this->config['facebook']['clientSecret'],
-            'redirectUri' => $this->baseUrl . '/oauth/facebook/callback',
+            'redirectUri' => $this->baseUrl . '/api/oauth/facebook/callback',
             'graphApiVersion' => $this->config['facebook']['graphApiVersion'] ?? 'v18.0',
         ]);
     }
@@ -105,7 +105,7 @@ class OAuthProviderFactory
         return [
             'clientId' => $this->config['microsoft']['clientId'],
             'clientSecret' => $this->config['microsoft']['clientSecret'],
-            'redirectUri' => $this->baseUrl . '/oauth/microsoft/callback',
+            'redirectUri' => $this->baseUrl . '/api/oauth/microsoft/callback',
             'tenant' => $this->config['microsoft']['tenant'] ?? 'common',
             'scopes' => ['openid', 'email', 'profile', 'User.Read'],
         ];
@@ -126,7 +126,7 @@ class OAuthProviderFactory
         return [
             'clientId' => $this->config['linkedin']['clientId'],
             'clientSecret' => $this->config['linkedin']['clientSecret'],
-            'redirectUri' => $this->baseUrl . '/oauth/linkedin/callback',
+            'redirectUri' => $this->baseUrl . '/api/oauth/linkedin/callback',
             'scopes' => ['openid', 'email', 'profile'],
         ];
     }

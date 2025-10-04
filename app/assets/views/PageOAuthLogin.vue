@@ -178,7 +178,7 @@ const handleLogin = async () => {
 }
 
 const getOAuthUrl = (provider: string) => {
-    return `${props.oauthBaseUrl}/${provider}`
+    return `/api/oauth/${provider}`
 }
 </script>
 

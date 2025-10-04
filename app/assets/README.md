@@ -15,13 +15,30 @@ app/assets/
 │   └── index.ts
 ├── interfaces/          # TypeScript interfaces
 │   └── index.ts
-├── routes/              # Route definitions
+├── routes/              # Frontend Vue Router routes
 │   └── index.ts
 ├── views/               # Page components
 │   ├── PageOAuthLogin.vue
 │   └── index.ts
 └── index.ts             # Main entry point (plugin)
 ```
+
+## Routes
+
+### Frontend Routes (Vue Router)
+
+Defined in `routes/index.ts`:
+- `/oauth/login` - OAuth login page (PageOAuthLogin.vue)
+
+### Backend API Routes
+
+Defined in `app/src/Routes/OAuthRoutes.php`:
+- `GET /api/oauth/{provider}` - Initiate OAuth flow
+- `GET /api/oauth/{provider}/callback` - Handle OAuth callback
+- `GET /api/oauth/link/{provider}` - Link provider to account
+- `POST /api/oauth/disconnect/{provider}` - Disconnect provider
+
+**Note:** Following UserFrosting 6 conventions, all backend API endpoints use the `/api` prefix.
 
 ## Components
 
@@ -34,6 +51,8 @@ Full-page Vue component for OAuth login page with:
 - Responsive design
 - TypeScript support
 
+**OAuth URLs:** Provider buttons link to `/api/oauth/{provider}` endpoints.
+
 **Props:**
 ```typescript
 {
@@ -43,7 +62,6 @@ Full-page Vue component for OAuth login page with:
     forgotPasswordUrl?: string  // Forgot password URL
     registerUrl?: string        // Registration URL
     enabledProviders?: string[] // Array of enabled providers
-    oauthBaseUrl?: string       // OAuth base URL (default: '/oauth')
 }
 ```
 
@@ -52,11 +70,13 @@ Full-page Vue component for OAuth login page with:
 **OAuthConnections.vue**
 Component for managing OAuth connections in user settings/profile page.
 
+**API Endpoints:** Uses `/api/oauth/link/{provider}` and `/api/oauth/disconnect/{provider}`.
+
 **Props:**
 ```typescript
 {
     userConnections?: Record<string, any>  // Current connections
-    oauthBaseUrl?: string                  // OAuth base URL
+}
 }
 ```
 

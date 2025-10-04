@@ -80,7 +80,7 @@ const isConnected = (providerId: string) => {
 }
 
 const getLinkUrl = (providerId: string) => {
-    return `${props.oauthBaseUrl}/link/${providerId}`
+    return `/api/oauth/link/${providerId}`
 }
 
 const disconnectProvider = async (providerId: string) => {
@@ -89,7 +89,7 @@ const disconnectProvider = async (providerId: string) => {
     }
 
     try {
-        const response = await fetch(`${props.oauthBaseUrl}/disconnect/${providerId}`, {
+        const response = await fetch(`/api/oauth/disconnect/${providerId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
