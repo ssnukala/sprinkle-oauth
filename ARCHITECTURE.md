@@ -8,46 +8,57 @@ The OAuth sprinkle follows the standard UserFrosting 6 folder structure, consist
 
 ```
 app/
-├── assets/                   # Frontend assets (Vue.js)
-│   ├── js/
-│   │   ├── components/       # Vue components
-│   │   ├── pages/            # Vue page components
-│   │   └── main.js          # Entry point
-│   ├── css/                  # Stylesheets
-│   ├── package.json         # Node dependencies
-│   ├── vite.config.js       # Build configuration
-│   └── README.md            # Assets documentation
-├── config/                   # Configuration files
-│   ├── default.php          # Default OAuth configuration
-│   └── oauth.example.php    # Example configuration
-├── locale/                   # Translations/i18n
+├── assets/                      # Frontend assets (TypeScript + Vue.js)
+│   ├── components/              # Reusable Vue components
+│   │   ├── OAuthConnections.vue
+│   │   └── index.ts
+│   ├── composables/             # Vue Composition API composables
+│   │   └── index.ts
+│   ├── interfaces/              # TypeScript interfaces
+│   │   └── index.ts
+│   ├── routes/                  # Route definitions
+│   │   └── index.ts
+│   ├── views/                   # Page components
+│   │   ├── PageOAuthLogin.vue
+│   │   └── index.ts
+│   ├── index.ts                 # Main entry point (plugin)
+│   └── README.md                # Assets documentation
+├── config/                      # Configuration files
+│   ├── default.php             # Default OAuth configuration
+│   └── oauth.example.php       # Example configuration
+├── locale/                      # Translations/i18n
 │   └── en_US/
-│       └── oauth.php        # English translations
-├── src/                      # PHP source code
-│   ├── Authenticator/        # OAuth authentication logic
+│       └── oauth.php           # English translations
+├── src/                         # PHP source code
+│   ├── Authenticator/           # OAuth authentication logic
 │   │   └── OAuthAuthenticator.php
-│   ├── Controller/           # HTTP controllers
+│   ├── Controller/              # HTTP controllers
 │   │   └── OAuthController.php
-│   ├── Database/             # Database layer
-│   │   ├── Migrations/       # Database migrations
+│   ├── Database/                # Database layer
+│   │   ├── Migrations/          # Database migrations
 │   │   │   └── CreateOAuthConnectionsTable.php
-│   │   └── Models/           # Eloquent models
+│   │   └── Models/              # Eloquent models
 │   │       └── OAuthConnection.php
-│   ├── Factory/              # Factory classes
+│   ├── Factory/                 # Factory classes
 │   │   └── OAuthProviderFactory.php
-│   ├── Repository/           # Data access layer
+│   ├── Repository/              # Data access layer
 │   │   └── OAuthConnectionRepository.php
-│   ├── Routes/               # Route definitions
+│   ├── Routes/                  # Route definitions
 │   │   └── OAuthRoutes.php
-│   ├── ServicesProvider/     # Dependency injection configuration
+│   ├── ServicesProvider/        # Dependency injection configuration
 │   │   ├── OAuthServicesProvider.php
 │   │   └── OAuthControllerProvider.php
-│   └── OAuth.php            # Main sprinkle class
-└── templates/                # Twig templates (legacy, being replaced by Vue)
-    ├── pages/
-    │   └── oauth-login.html.twig
-    └── components/
-        └── oauth-connections.html.twig
+│   └── OAuth.php               # Main sprinkle class
+├── templates/                   # Twig templates (legacy)
+│   ├── pages/
+│   │   └── oauth-login.html.twig
+│   └── components/
+│       └── oauth-connections.html.twig
+├── package.json                 # NPM package configuration
+├── tsconfig.json                # TypeScript configuration
+├── tsconfig.node.json           # TypeScript Node configuration
+└── vite.config.ts               # Vite build configuration
+```
 ```
 
 ## Key Architectural Patterns
@@ -232,46 +243,59 @@ class OAuthServicesProvider implements ServicesProviderInterface
 }
 ```
 
-### 6. Vue.js Frontend Assets
+### 6. Vue.js Frontend Assets (TypeScript)
 
-Following the UserFrosting Admin sprinkle pattern, frontend assets are built with Vue.js and Vite:
+Following the UserFrosting Admin sprinkle pattern exactly, frontend assets are built with TypeScript, Vue 3, and Vite:
 
-**Structure:**
+**Structure (matching Admin sprinkle):**
 ```
 app/assets/
-├── js/
-│   ├── components/          # Reusable Vue components
-│   │   └── OAuthConnectionsComponent.vue
-│   ├── pages/               # Full-page components
-│   │   └── OAuthLoginPage.vue
-│   └── main.js             # Entry point
-├── package.json            # Node dependencies
-└── vite.config.js          # Build configuration
+├── components/              # Reusable Vue components
+│   ├── OAuthConnections.vue
+│   └── index.ts
+├── composables/             # Vue Composition API composables
+│   └── index.ts
+├── interfaces/              # TypeScript interfaces
+│   └── index.ts
+├── routes/                  # Route definitions
+│   └── index.ts
+├── views/                   # Page components (not "pages")
+│   ├── PageOAuthLogin.vue
+│   └── index.ts
+└── index.ts                 # Main entry point (plugin)
 ```
 
 **Key Components:**
 
-**OAuthLoginPage.vue** - Full OAuth login page with:
+**PageOAuthLogin.vue** - Full OAuth login page with:
+- TypeScript with `<script setup>` syntax
 - Traditional username/password form
 - OAuth provider buttons (Google, Facebook, LinkedIn, Microsoft)
+- Typed props and events
 - Responsive design
-- Integrated alerts
 
-**OAuthConnectionsComponent.vue** - Manage OAuth connections:
+**OAuthConnections.vue** - Manage OAuth connections:
 - Display connected providers
 - Connect new providers
 - Disconnect existing providers
-- Real-time updates
+- TypeScript interfaces for type safety
+- Real-time updates with typed events
+
+**Package Structure:**
+- Uses `exports` field in package.json for modular imports
+- Can import individual components: `@userfrosting/sprinkle-oauth/views`
+- Plugin architecture: `import OAuthSprinkle from '@userfrosting/sprinkle-oauth'`
 
 **Build System:**
-- Uses Vite for fast development and optimized builds
-- Vue 3 with Composition API
-- ES6+ modules
-- Asset optimization and code splitting
+- TypeScript for type safety
+- Vite for fast development and optimized builds
+- Vue 3 with Composition API and `<script setup>`
+- Library mode for distribution as an NPM package
 
 **Development:**
 ```bash
-cd app/assets
+npm install
+npm run build
 npm install
 npm run dev      # Development server
 npm run build    # Production build
