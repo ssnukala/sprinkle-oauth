@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license   https://github.com/ssnukala/sprinkle-oauth/blob/master/LICENSE (MIT License)
  */
 
-namespace UserFrosting\Sprinkle\OAuth\Entity;
+namespace UserFrosting\Sprinkle\OAuth\Database\Models;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;

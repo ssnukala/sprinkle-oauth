@@ -75,8 +75,9 @@ git checkout -b feature/your-feature-name
 app/
 ├── src/
 │   ├── Controller/       # HTTP controllers
-│   ├── Database/         # Migrations
-│   ├── Entity/           # Database models
+│   ├── Database/         # Database layer
+│   │   ├── Migrations/   # Database migrations
+│   │   └── Models/       # Eloquent models
 │   ├── Repository/       # Data access layer
 │   ├── Service/          # Business logic
 │   └── ServicesProvider/ # DI container setup

@@ -162,7 +162,7 @@ The sprinkle creates an `oauth_connections` table:
 
 ### Key Components
 
-- **Entity**: `OAuthConnection` - Eloquent model for OAuth connections
+- **Model**: `OAuthConnection` - Eloquent model for OAuth connections (in `Database/Models`)
 - **Repository**: `OAuthConnectionRepository` - Data access layer
 - **Services**: 
   - `OAuthService` - OAuth provider factory and management

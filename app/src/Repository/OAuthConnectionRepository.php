@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace UserFrosting\Sprinkle\OAuth\Repository;
 
-use UserFrosting\Sprinkle\OAuth\Entity\OAuthConnection;
+use UserFrosting\Sprinkle\OAuth\Database\Models\OAuthConnection;
 
 /**
  * OAuth Connection Repository

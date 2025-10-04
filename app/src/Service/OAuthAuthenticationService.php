@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace UserFrosting\Sprinkle\OAuth\Service;
 
 use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository;
-use UserFrosting\Sprinkle\OAuth\Entity\OAuthConnection;
+use UserFrosting\Sprinkle\OAuth\Database\Models\OAuthConnection;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**

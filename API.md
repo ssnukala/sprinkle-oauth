@@ -25,7 +25,7 @@ The main sprinkle recipe class that registers the OAuth functionality.
 
 Eloquent model representing a connection between a user and an OAuth provider.
 
-**Location**: `app/src/Entity/OAuthConnection.php`
+**Location**: `app/src/Database/Models/OAuthConnection.php`
 
 **Properties**:
 ```php
