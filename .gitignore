@@ -28,6 +28,8 @@ Thumbs.db
 /tmp/
 
 # Node.js / Frontend assets
+node_modules/
+package-lock.json
 app/assets/node_modules/
 app/assets/package-lock.json
 app/assets/yarn.lock
