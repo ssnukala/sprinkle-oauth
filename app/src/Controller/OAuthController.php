@@ -14,8 +14,8 @@ namespace UserFrosting\Sprinkle\OAuth\Controller;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use UserFrosting\Sprinkle\OAuth\Service\OAuthService;
-use UserFrosting\Sprinkle\OAuth\Service\OAuthAuthenticationService;
+use UserFrosting\Sprinkle\OAuth\Factory\OAuthProviderFactory;
+use UserFrosting\Sprinkle\OAuth\Authenticator\OAuthAuthenticator;
 use UserFrosting\Sprinkle\Core\Exceptions\NotFoundException;
 use Slim\Views\Twig;
 
@@ -27,14 +27,14 @@ use Slim\Views\Twig;
 class OAuthController
 {
     /**
-     * @var OAuthService
+     * @var OAuthProviderFactory
      */
-    protected OAuthService $oauthService;
+    protected OAuthProviderFactory $oauthFactory;
 
     /**
-     * @var OAuthAuthenticationService
+     * @var OAuthAuthenticator
      */
-    protected OAuthAuthenticationService $authService;
+    protected OAuthAuthenticator $authenticator;
 
     /**
      * @var Twig
@@ -44,17 +44,17 @@ class OAuthController
     /**
      * Constructor
      *
-     * @param OAuthService $oauthService
-     * @param OAuthAuthenticationService $authService
+     * @param OAuthProviderFactory $oauthFactory
+     * @param OAuthAuthenticator $authenticator
      * @param Twig $view
      */
     public function __construct(
-        OAuthService $oauthService,
-        OAuthAuthenticationService $authService,
+        OAuthProviderFactory $oauthFactory,
+        OAuthAuthenticator $authenticator,
         Twig $view
     ) {
-        $this->oauthService = $oauthService;
-        $this->authService = $authService;
+        $this->oauthFactory = $oauthFactory;
+        $this->authenticator = $authenticator;
         $this->view = $view;
     }
 
@@ -71,8 +71,8 @@ class OAuthController
         $provider = $args['provider'] ?? '';
         
         try {
-            $authUrl = $this->oauthService->getAuthorizationUrl($provider);
-            $state = $this->oauthService->getState($provider);
+            $authUrl = $this->oauthFactory->getAuthorizationUrl($provider);
+            $state = $this->oauthFactory->getState($provider);
             
             // Store state in session for CSRF protection
             $_SESSION['oauth_state'][$provider] = $state;
@@ -137,16 +137,16 @@ class OAuthController
         
         try {
             // Get access token using the new service method
-            $tokenData = $this->oauthService->getAccessToken($provider, $code);
+            $tokenData = $this->oauthFactory->getAccessToken($provider, $code);
             
             // Get user details using the new service method
-            $providerUserData = $this->oauthService->getUserInfo($provider, $tokenData['access_token']);
+            $providerUserData = $this->oauthFactory->getUserInfo($provider, $tokenData['access_token']);
             
             // Add token data
             $providerUserData['token'] = $tokenData;
             
             // Find or create user
-            $result = $this->authService->findOrCreateUser($provider, $providerUserData);
+            $result = $this->authenticator->findOrCreateUser($provider, $providerUserData);
             $user = $result['user'];
             $isNewUser = $result['isNewUser'];
             
@@ -185,7 +185,7 @@ class OAuthController
      */
     public function loginPage(Request $request, Response $response): Response
     {
-        $enabledProviders = $this->oauthService->getEnabledProviders();
+        $enabledProviders = $this->oauthFactory->getEnabledProviders();
         
         return $this->view->render($response, 'pages/oauth-login.html.twig', [
             'enabledProviders' => $enabledProviders,
@@ -213,8 +213,8 @@ class OAuthController
         $provider = $args['provider'] ?? '';
         
         try {
-            $authUrl = $this->oauthService->getAuthorizationUrl($provider);
-            $state = $this->oauthService->getState($provider);
+            $authUrl = $this->oauthFactory->getAuthorizationUrl($provider);
+            $state = $this->oauthFactory->getState($provider);
             
             // Store state and link flag in session
             $_SESSION['oauth_state'][$provider] = $state;

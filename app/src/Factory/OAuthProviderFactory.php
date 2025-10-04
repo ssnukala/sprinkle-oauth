@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license   https://github.com/ssnukala/sprinkle-oauth/blob/master/LICENSE (MIT License)
  */
 
-namespace UserFrosting\Sprinkle\OAuth\Service;
+namespace UserFrosting\Sprinkle\OAuth\Factory;
 
 use Google\Client as GoogleClient;
 use League\OAuth2\Client\Provider\Facebook;
@@ -19,11 +19,11 @@ use GuzzleHttp\Client as GuzzleClient;
 use UserFrosting\Config\Config;
 
 /**
- * OAuth Service
+ * OAuth Provider Factory
  * 
- * Factory service for creating OAuth providers using official vendor SDKs
+ * Factory for creating OAuth provider instances using official vendor SDKs
  */
-class OAuthService
+class OAuthProviderFactory
 {
     /**
      * @var array OAuth provider configurations

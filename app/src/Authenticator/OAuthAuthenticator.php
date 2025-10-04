@@ -10,18 +10,18 @@ declare(strict_types=1);
  * @license   https://github.com/ssnukala/sprinkle-oauth/blob/master/LICENSE (MIT License)
  */
 
-namespace UserFrosting\Sprinkle\OAuth\Service;
+namespace UserFrosting\Sprinkle\OAuth\Authenticator;
 
 use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository;
 use UserFrosting\Sprinkle\OAuth\Database\Models\OAuthConnection;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 /**
- * OAuth Authentication Service
+ * OAuth Authenticator
  * 
  * Handles authentication, user creation, and OAuth connection management
  */
-class OAuthAuthenticationService
+class OAuthAuthenticator
 {
     /**
      * @var OAuthConnectionRepository
