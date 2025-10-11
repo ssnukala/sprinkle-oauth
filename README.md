@@ -1,5 +1,8 @@
 # OAuth Sprinkle for UserFrosting 6
 
+[![Tests](https://github.com/ssnukala/sprinkle-oauth/actions/workflows/tests.yml/badge.svg)](https://github.com/ssnukala/sprinkle-oauth/actions/workflows/tests.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 OAuth authentication sprinkle for UserFrosting 6, enabling OAuth login using Google, Meta (Facebook, Instagram), Microsoft (Outlook), and LinkedIn.
 
 **Uses Official Vendor SDKs** for better compatibility and up-to-date OAuth implementations.
@@ -237,9 +240,49 @@ See [app/assets/README.md](app/assets/README.md) for detailed frontend documenta
 - Unique constraints to prevent duplicate connections
 - OAuth tokens are hidden from API responses
 
+## Testing
+
+This sprinkle includes a comprehensive test suite using PHPUnit. Tests follow UserFrosting 6 patterns and include:
+
+- **Integration Tests**: Testing service and repository layers
+- **Controller Tests**: Testing HTTP endpoints and OAuth flows
+- **Factory Tests**: Testing OAuth provider factory
+
+### Running Tests
+
+```bash
+# Install dependencies
+composer install
+
+# Run all tests
+vendor/bin/phpunit
+
+# Run with coverage report
+vendor/bin/phpunit --coverage-html coverage/
+
+# Run specific test
+vendor/bin/phpunit --filter testMethodName
+```
+
+### Continuous Integration
+
+Tests run automatically via GitHub Actions on:
+- Pull requests
+- Pushes to main/develop branches
+
+See [app/tests/README.md](app/tests/README.md) for detailed testing documentation.
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for new features
+4. Ensure all tests pass: `vendor/bin/phpunit`
+5. Submit a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## License
 
