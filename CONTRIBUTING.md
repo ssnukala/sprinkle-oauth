@@ -91,9 +91,21 @@ See [app/assets/README.md](app/assets/README.md) for detailed frontend documenta
    ```
 
 5. **Test your changes**:
+   - Run the test suite: `vendor/bin/phpunit`
+   - Write tests for new features (see [app/tests/README.md](app/tests/README.md))
    - Test with at least one OAuth provider
    - Verify existing functionality still works
    - Test edge cases
+   - Ensure test coverage remains above 80%
+
+6. **Run code quality tools**:
+   ```bash
+   # Run PHP CS Fixer
+   vendor/bin/php-cs-fixer fix
+   
+   # Run PHPStan
+   vendor/bin/phpstan analyse
+   ```
 
 #### Code Structure
 
@@ -141,7 +153,24 @@ To add a new provider (e.g., GitHub):
 
 5. **Update templates** to add GitHub button
 
-6. **Update documentation** (README, INSTALL.md)
+6. **Write tests** for the new provider:
+   ```php
+   // In app/tests/Integration/OAuthProviderFactoryTest.php
+   public function testCanCreateGitHubProviderWhenConfigured(): void
+   {
+       $this->ci->get('config')->set('oauth.github', [
+           'clientId' => 'test-id',
+           'clientSecret' => 'test-secret',
+       ]);
+       
+       $factory = $this->ci->get(OAuthProviderFactory::class);
+       $provider = $factory->create('github');
+       
+       $this->assertInstanceOf(GitHub::class, $provider);
+   }
+   ```
+
+7. **Update documentation** (README, INSTALL.md)
 
 #### Pull Request Process
 
@@ -171,11 +200,34 @@ To add a new provider (e.g., GitHub):
 
 ### Testing
 
-Currently, this project uses manual testing. Future improvements welcome:
+Currently, this project uses automated integration tests with PHPUnit. See [app/tests/README.md](app/tests/README.md) for the complete testing guide.
 
-- Unit tests for services
+**Test Suite Overview:**
+- Unit tests for services and factories
 - Integration tests for OAuth flows
-- Mock providers for testing
+- Repository tests for data access
+- Controller tests for HTTP endpoints
+
+**Running Tests:**
+```bash
+# Run all tests
+vendor/bin/phpunit
+
+# Run with coverage
+vendor/bin/phpunit --coverage-html coverage/
+
+# Run specific test
+vendor/bin/phpunit --filter testMethodName
+```
+
+**Writing New Tests:**
+- All tests extend `OAuthTestCase`
+- Use factories for test data
+- Mock external OAuth provider APIs
+- Test both success and failure scenarios
+- Maintain test coverage above 80%
+
+See the [Testing Guide](app/tests/README.md) for detailed examples and patterns.
 
 ### Documentation
 
