@@ -13,20 +13,22 @@ declare(strict_types=1);
 namespace UserFrosting\Sprinkle\OAuth\ServicesProvider;
 
 use UserFrosting\Config\Config;
-use UserFrosting\Sprinkle\OAuth\Factory\OAuthProviderFactory;
+use UserFrosting\Sprinkle\Account\Database\Models\Interfaces\UserInterface;
 use UserFrosting\Sprinkle\OAuth\Authenticator\OAuthAuthenticator;
+use UserFrosting\Sprinkle\OAuth\Factory\OAuthProviderFactory;
 use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository;
 use UserFrosting\ServicesProvider\ServicesProviderInterface;
 
 /**
- * OAuth Services Provider
- * 
- * Registers OAuth services in the DI container
+ * OAuth Services Provider.
+ *
+ * Registers OAuth-related services in the dependency injection container.
+ * Follows UserFrosting 6 service provider pattern.
  */
 class OAuthServicesProvider implements ServicesProviderInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function register(): array
     {
@@ -35,12 +37,15 @@ class OAuthServicesProvider implements ServicesProviderInterface
             OAuthConnectionRepository::class => \DI\autowire(),
 
             // OAuth Provider Factory
+            // Injects Config and site base URL for provider initialization
             OAuthProviderFactory::class => \DI\autowire()
                 ->constructorParameter('config', \DI\get(Config::class))
                 ->constructorParameter('baseUrl', \DI\string('{site.uri.public}')),
 
             // OAuth Authenticator
-            OAuthAuthenticator::class => \DI\autowire(),
+            // Injects repository and User model class for authentication flow
+            OAuthAuthenticator::class => \DI\autowire()
+                ->constructorParameter('userModel', \DI\get(UserInterface::class)),
         ];
     }
 }

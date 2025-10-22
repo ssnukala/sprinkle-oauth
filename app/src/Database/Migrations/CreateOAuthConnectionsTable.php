@@ -16,18 +16,25 @@ use Illuminate\Database\Schema\Blueprint;
 use UserFrosting\Sprinkle\Core\Database\Migration;
 
 /**
- * OAuth Connections table migration
- * Creates table to store OAuth provider connections for users
+ * OAuth Connections Table Migration.
+ *
+ * Creates the oauth_connections table to store OAuth provider connections for users.
+ * This table maintains a many-to-one relationship with users (each user can have multiple OAuth connections).
+ * Supports multiple OAuth providers: Google, Facebook, LinkedIn, Microsoft.
+ *
+ * Design Note: This is a separate table from 'persistences' because OAuth connections
+ * serve a different purpose than session persistence. See PERSISTENCE_INTEGRATION_ANALYSIS.md
+ * for detailed rationale.
  */
 class CreateOAuthConnectionsTable extends Migration
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public static $dependencies = [];
+    public static array $dependencies = [];
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function up(): void
     {
@@ -53,7 +60,7 @@ class CreateOAuthConnectionsTable extends Migration
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function down(): void
     {
