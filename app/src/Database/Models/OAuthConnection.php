@@ -12,27 +12,23 @@ declare(strict_types=1);
 
 namespace UserFrosting\Sprinkle\OAuth\Database\Models;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use UserFrosting\Sprinkle\Account\Database\Models\Interfaces\UserInterface;
+use UserFrosting\Sprinkle\Core\Database\Models\Model;
+use UserFrosting\Sprinkle\OAuth\Database\Models\Interfaces\OAuthConnectionInterface;
 
 /**
- * OAuth Connection Entity
- * 
+ * OAuth Connection Model.
+ *
  * Represents a connection between a UserFrosting user and an OAuth provider.
  * Allows multiple OAuth providers to be associated with a single user account.
  *
- * @property int $id
- * @property int $user_id
- * @property string $provider OAuth provider name (google, facebook, microsoft, linkedin)
- * @property string $provider_user_id User ID from the OAuth provider
- * @property string $access_token
- * @property string|null $refresh_token
- * @property \DateTime $expires_at
- * @property array $user_data JSON data from provider
- * @property \DateTime $created_at
- * @property \DateTime $updated_at
+ * @mixin \Illuminate\Database\Eloquent\Builder
  */
-class OAuthConnection extends Model
+class OAuthConnection extends Model implements OAuthConnectionInterface
 {
     /**
      * The name of the table for the current model.
@@ -72,10 +68,45 @@ class OAuthConnection extends Model
     ];
 
     /**
-     * Get the user that owns the OAuth connection.
+     * {@inheritDoc}
      */
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo('UserFrosting\Sprinkle\Account\Database\Models\User', 'user_id');
+        /** @var string */
+        $relation = static::$ci?->get(UserInterface::class);
+
+        return $this->belongsTo($relation);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function scopeNotExpired(Builder $query): Builder|QueryBuilder
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('expires_at')
+              ->orWhere('expires_at', '>', Carbon::now());
+        });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function scopeForProvider(Builder $query, string $provider): Builder|QueryBuilder
+    {
+        return $query->where('provider', $provider);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function scopeJoinUser(Builder $query): Builder|QueryBuilder
+    {
+        /** @var string */
+        $userTable = static::$ci?->get(UserInterface::class)::TABLE ?? 'users';
+
+        return $query->join($userTable, function ($join) use ($userTable) {
+            $join->on($this->getTable() . '.user_id', '=', $userTable . '.id');
+        });
     }
 }
