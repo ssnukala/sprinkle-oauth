@@ -27,6 +27,12 @@ Thumbs.db
 # Temporary files
 /tmp/
 
+# Testing
+.phpunit.cache/
+.phpunit.result.cache
+phpunit.xml
+coverage/
+
 # Node.js / Frontend assets
 node_modules/
 package-lock.json
