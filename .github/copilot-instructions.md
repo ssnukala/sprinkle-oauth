@@ -102,10 +102,75 @@ When making code changes, refer to the following official UserFrosting 6 reposit
 ### 9. Testing
 
 **Testing approach:**
-- Write tests following UserFrosting testing patterns
-- Use PHPUnit for unit tests
-- Mock dependencies appropriately
+- Write tests following UserFrosting testing patterns (see [app/tests/README.md](../app/tests/README.md))
+- Use PHPUnit for unit and integration tests
+- All tests extend `OAuthTestCase` which configures the test environment
+- Mock dependencies appropriately (especially external OAuth provider APIs)
 - Test both success and failure scenarios
+- Maintain test coverage above 80%
+
+**Test Structure:**
+```
+app/tests/
+├── OAuthTestCase.php          # Base test case
+├── Controller/                # Controller tests
+├── Integration/               # Service & repository tests
+└── README.md                  # Testing guide
+```
+
+**Running Tests:**
+```bash
+# Run all tests
+vendor/bin/phpunit
+
+# Run with coverage
+vendor/bin/phpunit --coverage-html coverage/
+
+# Run specific test
+vendor/bin/phpunit --filter testMethodName
+```
+
+**Writing Tests:**
+- Use factories for test data (e.g., `User::factory()->create()`)
+- Access services via DI container: `$this->ci->get(ServiceClass::class)`
+- Set test config: `$this->ci->get('config')->set('oauth.google', [...])`
+- Mock external APIs: Never make real OAuth API calls in tests
+- Use `refreshDatabase()` for clean database state
+
+**Test Examples:**
+```php
+// Test service from container
+public function testServiceFromContainer(): void
+{
+    $factory = $this->ci->get(OAuthProviderFactory::class);
+    $this->assertInstanceOf(OAuthProviderFactory::class, $factory);
+}
+
+// Test repository operations
+public function testCanCreateConnection(): void
+{
+    $user = User::factory()->create();
+    $repo = $this->ci->get(OAuthConnectionRepository::class);
+    
+    $connection = $repo->create([
+        'user_id' => $user->id,
+        'provider' => 'google',
+        'provider_user_id' => '123',
+        'access_token' => 'token',
+    ]);
+    
+    $this->assertNotNull($connection->id);
+}
+
+// Test HTTP endpoints
+public function testLoginPageLoads(): void
+{
+    $request = $this->createRequest('GET', '/oauth/login');
+    $response = $this->handleRequest($request);
+    
+    $this->assertEquals(200, $response->getStatusCode());
+}
+```
 
 ### 10. Documentation
 
@@ -141,9 +206,12 @@ When modifying this sprinkle, ensure compatibility with:
 
 1. **Review the framework code** in the reference repositories to understand existing patterns
 2. **Check for existing components** that can be reused or extended
-3. **Follow the established patterns** rather than creating new approaches
-4. **Test integration** with UserFrosting core functionality
-5. **Update documentation** to reflect changes
+3. **Run existing tests** to establish baseline: `vendor/bin/phpunit`
+4. **Follow the established patterns** rather than creating new approaches
+5. **Write tests for new features** before or alongside implementation
+6. **Test integration** with UserFrosting core functionality
+7. **Update documentation** to reflect changes
+8. **Run tests again** to ensure nothing broke: `vendor/bin/phpunit`
 
 ## Common Pitfalls to Avoid
 
@@ -155,12 +223,57 @@ When modifying this sprinkle, ensure compatibility with:
 - ❌ Don't access database directly without using repositories
 - ❌ Don't forget to add translations for user-facing text
 - ❌ Don't ignore error handling and validation
+- ❌ Don't skip writing tests for new features
+- ❌ Don't make real API calls in tests (always mock external services)
+- ❌ Don't commit code without running the test suite
 
 ## Resources
 
 - **UserFrosting Documentation**: https://learn.userfrosting.com/
 - **UserFrosting Chat**: https://chat.userfrosting.com/
 - **UserFrosting GitHub**: https://github.com/userfrosting
+- **PHPUnit Documentation**: https://phpunit.de/documentation.html
+- **Testing Guide**: [app/tests/README.md](../app/tests/README.md)
+
+## Development Workflow Example
+
+**Adding a new OAuth provider (e.g., GitHub):**
+
+1. **Write the test first** (TDD approach):
+   ```php
+   // app/tests/Integration/OAuthProviderFactoryTest.php
+   public function testCanCreateGitHubProviderWhenConfigured(): void
+   {
+       $this->ci->get('config')->set('oauth.github', [...]);
+       $factory = $this->ci->get(OAuthProviderFactory::class);
+       $provider = $factory->create('github');
+       $this->assertInstanceOf(GitHub::class, $provider);
+   }
+   ```
+
+2. **Run test** (should fail): `vendor/bin/phpunit --filter testCanCreateGitHubProviderWhenConfigured`
+
+3. **Implement the feature**:
+   - Add dependency to `composer.json`
+   - Update `OAuthProviderFactory` to support GitHub
+   - Add configuration in `app/config/default.php`
+   - Update routes if needed
+
+4. **Run test again** (should pass): `vendor/bin/phpunit --filter testCanCreateGitHubProviderWhenConfigured`
+
+5. **Run full test suite**: `vendor/bin/phpunit`
+
+6. **Update documentation**: README.md, INSTALL.md, etc.
+
+7. **Commit with meaningful message**:
+   ```
+   Add GitHub OAuth provider support
+   
+   - Add GitHub provider to OAuthProviderFactory
+   - Add configuration for GitHub credentials
+   - Add tests for GitHub provider creation
+   - Update documentation
+   ```
 
 ---
 
