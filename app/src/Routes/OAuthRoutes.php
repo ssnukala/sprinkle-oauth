@@ -19,14 +19,25 @@ use UserFrosting\Sprinkle\OAuth\Controller\OAuthController;
 use UserFrosting\Sprinkle\Core\Middlewares\NoCache;
 
 /**
- * Routes for OAuth operations.
- * 
- * Following UserFrosting 6 conventions:
- * - Backend API routes use /api prefix
- * - Frontend routes are defined in app/assets/routes/index.ts
+ * OAuth Routes Definition.
+ *
+ * Defines RESTful routes for OAuth authentication and provider management.
+ * Implements UserFrosting 6 RouteDefinitionInterface pattern.
+ *
+ * Route Structure:
+ * - `/api/oauth/{provider}` - Redirect to OAuth provider for authentication
+ * - `/api/oauth/{provider}/callback` - OAuth callback handler
+ * - `/api/oauth/link/{provider}` - Link provider to authenticated user
+ * - `/api/oauth/disconnect/{provider}` - Disconnect provider from user
+ * - `/oauth/login` - OAuth login page (fallback for server-side rendering)
+ *
+ * All routes use NoCache middleware to prevent caching of OAuth responses.
  */
 class OAuthRoutes implements RouteDefinitionInterface
 {
+    /**
+     * {@inheritDoc}
+     */
     public function register(App $app): void
     {
         // OAuth API routes - Backend endpoints

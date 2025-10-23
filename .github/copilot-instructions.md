@@ -187,20 +187,94 @@ public function testLoginPageLoads(): void
 
 This sprinkle provides OAuth authentication for UserFrosting 6. Key components:
 
-- **Service Layer**: `OAuthService`, `OAuthAuthenticationService` handle OAuth provider logic
-- **Repository Layer**: `OAuthConnectionRepository` manages OAuth connection data
-- **Entity Layer**: `OAuthConnection` represents OAuth provider connections
+- **Model Layer**: `OAuthConnection` model implements `OAuthConnectionInterface`
+  - Extends `UserFrosting\Sprinkle\Core\Database\Models\Model`
+  - Manages OAuth provider connections (separate from session persistence)
+  - Supports multiple OAuth providers per user (Google, Facebook, LinkedIn, Microsoft)
+- **Interface Layer**: `OAuthConnectionInterface` defines the contract for OAuth connections
+  - Follows UserFrosting 6 interface patterns (similar to `PersistenceInterface`)
+  - Includes scopes: `notExpired()`, `forProvider()`, `joinUser()`
+- **Repository Layer**: `OAuthConnectionRepository` manages OAuth connection data access
+  - Provides CRUD operations for OAuth connections
+  - Implements repository pattern following UserFrosting conventions
+- **Authenticator Layer**: `OAuthAuthenticator` handles OAuth user flow
+  - Creates new users from OAuth data
+  - Links OAuth providers to existing users
+  - Manages OAuth tokens and refresh logic
 - **Controller Layer**: `OAuthController` handles HTTP requests for OAuth flows
+  - Redirect to provider authorization
+  - Handle OAuth callbacks
+  - Link/unlink providers
 - **Routes**: `OAuthRoutes` defines OAuth-specific routes
+  - `/oauth/{provider}` - Redirect to OAuth provider
+  - `/oauth/{provider}/callback` - OAuth callback handler
+  - `/oauth/link/{provider}` - Link provider to existing account
+
+### Architecture Decision: Separate OAuth Table
+
+**Why OAuth connections are stored in a separate table, not in the `persistences` table:**
+
+1. **Different Purpose**: 
+   - `persistences` table: Session tokens and remember-me functionality
+   - `oauth_connections` table: OAuth provider account linking and tokens
+
+2. **Different Data Models**:
+   - Persistence: Simple token pairs with expiration
+   - OAuth: Provider, provider_user_id, access_token, refresh_token, provider-specific user_data
+
+3. **Different Lifecycles**:
+   - Persistence: Tokens expire and are recreated frequently
+   - OAuth: Long-term connections with token refresh capability
+
+4. **UserFrosting 6 Pattern**: Follows the same separation pattern as roles, permissions, activities
+
+5. **Multiple Providers**: Users can link multiple OAuth providers (Google + Facebook + LinkedIn simultaneously)
+
+This design decision maintains clean separation of concerns and follows UserFrosting 6 architectural patterns.
 
 ### Integration Points
 
 When modifying this sprinkle, ensure compatibility with:
 - UserFrosting's `User` entity and authentication system
+- UserFrosting's `Model` base class and DI container patterns
 - Existing route definitions and middleware
 - Core sprinkle's service providers
 - The bakery CLI command system
 - UserFrosting's alert/notification system
+
+### OAuth-Specific Patterns
+
+**Model Pattern:**
+```php
+class OAuthConnection extends Model implements OAuthConnectionInterface
+{
+    // Use UserFrosting base Model, not Laravel's
+    // Implement interface with scopes
+    // Follow proper relationship patterns
+}
+```
+
+**Scopes Pattern:**
+```php
+// Filter expired connections
+OAuthConnection::notExpired()->get();
+
+// Filter by provider
+OAuthConnection::forProvider('google')->get();
+
+// Join with user table
+OAuthConnection::joinUser()->get();
+```
+
+**Repository Pattern:**
+```php
+class OAuthConnectionRepository
+{
+    public function findByProviderAndProviderUserId(string $provider, string $providerUserId): ?OAuthConnection
+    public function findByUserId(int $userId)
+    public function create(array $data): OAuthConnection
+}
+```
 
 ## Before Making Changes
 

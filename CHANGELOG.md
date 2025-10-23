@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **OAuthConnectionInterface**: New interface following UserFrosting 6 patterns (similar to `PersistenceInterface`)
+  - Defines contract for OAuth connection models
+  - Includes scopes: `notExpired()`, `forProvider()`, `joinUser()`
+- **Comprehensive Documentation**: Added PERSISTENCE_INTEGRATION_ANALYSIS.md explaining architecture decisions
+- **Enhanced PHPDoc Comments**: All classes and methods now have comprehensive documentation
+
+### Changed
+- **BREAKING**: `OAuthConnection` model now extends `UserFrosting\Sprinkle\Core\Database\Models\Model` (was `Illuminate\Database\Eloquent\Model`)
+  - Implements `OAuthConnectionInterface` for type safety
+  - Uses DI container for User relationship (`UserInterface`)
+  - Added scopes: `notExpired()`, `forProvider()`, `joinUser()`
+- **OAuthAuthenticator**: Enhanced with proper type declarations and DI injection
+  - Uses `UserInterface` from DI container instead of hardcoded class names
+  - All methods have comprehensive PHPDoc with proper type hints
+  - Parameters use `array<string, mixed>` notation for better IDE support
+- **OAuthConnectionRepository**: Updated with interface types and comprehensive documentation
+  - All return types use `OAuthConnectionInterface` instead of concrete class
+  - Added `Collection<int, OAuthConnectionInterface>` type hint for findByUserId
+  - Enhanced method documentation explaining use cases
+- **Service Providers**: Enhanced with proper DI configuration
+  - `OAuthServicesProvider` now injects `UserInterface` into `OAuthAuthenticator`
+  - Added comprehensive comments explaining each service registration
+- **Migration**: Enhanced documentation with design rationale
+  - Explains why `oauth_connections` is separate from `persistences` table
+  - Added reference to architecture decision document
+- **Routes**: Enhanced with comprehensive route documentation
+- **README**: Added "Architecture" section explaining design decisions
+
+### Documentation
+- Updated .github/copilot-instructions.md with OAuth-specific patterns
+- Added architecture decision documentation for separate OAuth table
+- Enhanced all PHPDoc comments to follow UserFrosting 6 standards
+- Added comprehensive code examples for scopes and interfaces
+
+### Architecture Decision
+- **Separate OAuth Table**: Maintains `oauth_connections` as separate table from `persistences`
+  - Different purposes: OAuth linking vs session management
+  - Different data models: OAuth needs provider, tokens, refresh tokens, user_data
+  - Different lifecycles: long-term connections vs frequent token rotation
+  - Multiple providers: users can link multiple OAuth providers (Google + Facebook + LinkedIn)
+  - Follows UF6 pattern: separation of concerns (like roles, permissions, activities)
+
 ## [1.1.1] - 2025-01-XX
 
 ### Fixed
