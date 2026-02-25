@@ -15,6 +15,8 @@ namespace UserFrosting\Sprinkle\OAuth\Routes;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use UserFrosting\Routes\RouteDefinitionInterface;
+use UserFrosting\Sprinkle\Account\Authenticate\AuthGuard;
+use UserFrosting\Sprinkle\OAuth\Controller\GoogleSheetsController;
 use UserFrosting\Sprinkle\OAuth\Controller\OAuthController;
 use UserFrosting\Sprinkle\Core\Middlewares\NoCache;
 
@@ -42,13 +44,14 @@ class OAuthRoutes implements RouteDefinitionInterface
     {
         // OAuth API routes - Backend endpoints
         $app->group('/api/oauth', function (RouteCollectorProxy $group) {
-            // OAuth provider redirect - Initiates OAuth flow
-            $group->get('/{provider}', [OAuthController::class, 'redirect'])
-                ->setName('api.oauth.redirect');
+            // Google Sheets API endpoints (require authentication)
+            $group->get('/sheets/read', [GoogleSheetsController::class, 'read'])
+                ->setName('api.oauth.sheets.read')
+                ->add(AuthGuard::class);
 
-            // OAuth callback - Handles provider callback
-            $group->get('/{provider}/callback', [OAuthController::class, 'callback'])
-                ->setName('api.oauth.callback');
+            $group->post('/sheets/append', [GoogleSheetsController::class, 'append'])
+                ->setName('api.oauth.sheets.append')
+                ->add(AuthGuard::class);
 
             // Link OAuth provider to existing account (authenticated)
             $group->get('/link/{provider}', [OAuthController::class, 'linkProvider'])
@@ -57,6 +60,14 @@ class OAuthRoutes implements RouteDefinitionInterface
             // Disconnect OAuth provider from account (authenticated)
             $group->post('/disconnect/{provider}', [OAuthController::class, 'disconnect'])
                 ->setName('api.oauth.disconnect');
+
+            // OAuth provider redirect - Initiates OAuth flow
+            $group->get('/{provider}', [OAuthController::class, 'redirect'])
+                ->setName('api.oauth.redirect');
+
+            // OAuth callback - Handles provider callback
+            $group->get('/{provider}/callback', [OAuthController::class, 'callback'])
+                ->setName('api.oauth.callback');
         })->add(NoCache::class);
 
         // Frontend page route (for legacy/direct access)

@@ -17,6 +17,7 @@ use UserFrosting\Sprinkle\Account\Database\Models\Interfaces\UserInterface;
 use UserFrosting\Sprinkle\OAuth\Authenticator\OAuthAuthenticator;
 use UserFrosting\Sprinkle\OAuth\Factory\OAuthProviderFactory;
 use UserFrosting\Sprinkle\OAuth\Repository\OAuthConnectionRepository;
+use UserFrosting\Sprinkle\OAuth\Services\GoogleSheetsService;
 use UserFrosting\ServicesProvider\ServicesProviderInterface;
 
 /**
@@ -46,6 +47,9 @@ class OAuthServicesProvider implements ServicesProviderInterface
             // Injects repository and User model class for authentication flow
             OAuthAuthenticator::class => \DI\autowire()
                 ->constructorParameter('userModel', \DI\get(UserInterface::class)),
+
+            // Google Sheets Service
+            GoogleSheetsService::class => \DI\autowire(),
         ];
     }
 }

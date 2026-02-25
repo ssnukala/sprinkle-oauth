@@ -21,6 +21,8 @@ return [
         'google' => [
             'clientId' => getenv('OAUTH_GOOGLE_CLIENT_ID') ?: '',
             'clientSecret' => getenv('OAUTH_GOOGLE_CLIENT_SECRET') ?: '',
+            'scopes' => [],            // Additional scopes beyond email/profile/openid (e.g., ['https://www.googleapis.com/auth/spreadsheets'])
+            'access_type' => 'online', // Set to 'offline' for refresh tokens (needed for Google Sheets)
         ],
         'facebook' => [
             'clientId' => getenv('OAUTH_FACEBOOK_CLIENT_ID') ?: '',

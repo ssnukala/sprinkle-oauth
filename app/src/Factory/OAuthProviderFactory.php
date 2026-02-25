@@ -66,7 +66,20 @@ class OAuthProviderFactory
         $client->addScope('email');
         $client->addScope('profile');
         $client->addScope('openid');
-        
+
+        // Add configured additional scopes (e.g., spreadsheets for Google Sheets)
+        $additionalScopes = $this->config['google']['scopes'] ?? [];
+        foreach ($additionalScopes as $scope) {
+            $client->addScope($scope);
+        }
+
+        // Set access type for refresh tokens (needed for offline access like Sheets)
+        $accessType = $this->config['google']['access_type'] ?? 'online';
+        $client->setAccessType($accessType);
+        if ($accessType === 'offline') {
+            $client->setPrompt('consent');
+        }
+
         return $client;
     }
 

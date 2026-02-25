@@ -12,22 +12,24 @@ declare(strict_types=1);
 
 namespace UserFrosting\Sprinkle\OAuth;
 
+use UserFrosting\Sprinkle\Account\Account;
 use UserFrosting\Sprinkle\Core\Core;
+use UserFrosting\Sprinkle\Core\Sprinkle\Recipe\MigrationRecipe;
 use UserFrosting\Sprinkle\SprinkleRecipe;
+use UserFrosting\Sprinkle\OAuth\Database\Migrations\CreateOAuthConnectionsTable;
 use UserFrosting\Sprinkle\OAuth\Routes\OAuthRoutes;
 use UserFrosting\Sprinkle\OAuth\ServicesProvider\OAuthServicesProvider;
-use UserFrosting\Sprinkle\OAuth\ServicesProvider\OAuthControllerProvider;
 
 /**
  * OAuth Sprinkle Recipe
- * 
+ *
  * Provides OAuth authentication for UserFrosting using multiple providers:
  * - Google
  * - Meta (Facebook, Instagram)
  * - Microsoft (Outlook)
  * - LinkedIn
  */
-class OAuth implements SprinkleRecipe
+class OAuth implements SprinkleRecipe, MigrationRecipe
 {
     /**
      * Returns sprinkle name
@@ -56,12 +58,13 @@ class OAuth implements SprinkleRecipe
     }
 
     /**
-     * Returns service providers
+     * Returns dependent sprinkles
      */
     public function getSprinkles(): array
     {
         return [
             Core::class,
+            Account::class,
         ];
     }
 
@@ -72,7 +75,16 @@ class OAuth implements SprinkleRecipe
     {
         return [
             OAuthServicesProvider::class,
-            OAuthControllerProvider::class,
+        ];
+    }
+
+    /**
+     * Returns migrations
+     */
+    public function getMigrations(): array
+    {
+        return [
+            CreateOAuthConnectionsTable::class,
         ];
     }
 }
