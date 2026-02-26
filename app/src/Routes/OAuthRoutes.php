@@ -27,10 +27,13 @@ use UserFrosting\Sprinkle\Core\Middlewares\NoCache;
  * Implements UserFrosting 6 RouteDefinitionInterface pattern.
  *
  * Route Structure:
- * - `/api/oauth/{provider}` - Redirect to OAuth provider for authentication
- * - `/api/oauth/{provider}/callback` - OAuth callback handler
- * - `/api/oauth/link/{provider}` - Link provider to authenticated user
+ * - `/api/oauth/{provider}` - Redirect to OAuth provider (supports ?popup=1 for popup flow)
+ * - `/api/oauth/{provider}/callback` - OAuth callback (supports popup postMessage)
+ * - `/api/oauth/connections` - Get current user's OAuth connections (JSON)
+ * - `/api/oauth/link/{provider}` - Link provider to authenticated user (supports ?popup=1)
  * - `/api/oauth/disconnect/{provider}` - Disconnect provider from user
+ * - `/api/oauth/sheets/read` - Read Google Sheets data
+ * - `/api/oauth/sheets/append` - Append rows to Google Sheets
  * - `/oauth/login` - OAuth login page (fallback for server-side rendering)
  *
  * All routes use NoCache middleware to prevent caching of OAuth responses.
@@ -51,6 +54,11 @@ class OAuthRoutes implements RouteDefinitionInterface
 
             $group->post('/sheets/append', [GoogleSheetsController::class, 'append'])
                 ->setName('api.oauth.sheets.append')
+                ->add(AuthGuard::class);
+
+            // Get current user's OAuth connections (authenticated, JSON)
+            $group->get('/connections', [OAuthController::class, 'connections'])
+                ->setName('api.oauth.connections')
                 ->add(AuthGuard::class);
 
             // Link OAuth provider to existing account (authenticated)

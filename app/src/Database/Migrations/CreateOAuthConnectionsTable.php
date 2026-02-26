@@ -31,7 +31,7 @@ class CreateOAuthConnectionsTable extends Migration
     /**
      * {@inheritDoc}
      */
-    public static array $dependencies = [];
+    public static $dependencies = [];
 
     /**
      * {@inheritDoc}

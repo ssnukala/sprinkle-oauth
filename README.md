@@ -9,13 +9,16 @@ OAuth authentication sprinkle for UserFrosting 6, enabling OAuth login using Goo
 
 ## Features
 
-- 🔐 **Multiple OAuth Providers**: Support for Google, Facebook, LinkedIn, and Microsoft
-- 👤 **Auto User Creation**: Automatically creates UserFrosting accounts from OAuth authentication
-- 🔗 **Multiple Provider Support**: Users can link multiple OAuth providers to a single account
-- 🎨 **Login Screen**: Beautiful login page with OAuth buttons
-- ⚡ **Easy Configuration**: Simple environment-based configuration
-- 🛡️ **Secure**: CSRF protection and secure token handling
-- 📦 **Official SDKs**: Uses official vendor packages for reliability
+- **Multiple OAuth Providers**: Support for Google, Facebook, LinkedIn, and Microsoft
+- **PKCE Support**: Full OAuth 2.1 PKCE (Proof Key for Code Exchange) for defense-in-depth security
+- **Auto User Creation**: Automatically creates UserFrosting accounts from OAuth authentication
+- **Multiple Provider Support**: Users can link multiple OAuth providers to a single account
+- **Popup OAuth Flow**: postMessage-based popup window flow — no page redirect needed
+- **Google Sheets Integration**: Read from and write to Google Sheets via authenticated API
+- **Login Screen**: Login page with OAuth buttons and traditional login
+- **Easy Configuration**: Simple environment-based configuration
+- **Secure**: CSRF protection, PKCE, and secure token handling
+- **Official SDKs**: Uses official vendor packages for reliability
 
 ## Requirements
 
@@ -139,10 +142,16 @@ Include the OAuth connections component in your settings template:
 
 The sprinkle provides the following routes:
 
+**OAuth Authentication:**
 - `GET /oauth/login` - OAuth login page
-- `GET /oauth/{provider}` - Redirect to OAuth provider
+- `GET /oauth/{provider}` - Redirect to OAuth provider (supports `?popup=1` for popup mode)
 - `GET /oauth/{provider}/callback` - OAuth callback handler
 - `GET /oauth/link/{provider}` - Link provider to existing account
+- `GET /api/oauth/connections` - Get current user's OAuth connections (JSON)
+
+**Google Sheets:**
+- `GET /api/oauth/sheets/read` - Read data from a Google Sheet
+- `POST /api/oauth/sheets/append` - Append rows to a Google Sheet
 
 ## Database Schema
 
@@ -226,6 +235,11 @@ import { OAuthConnections } from '@ssnukala/sprinkle-oauth/components'
 
 // Import composables
 import { useOAuth } from '@ssnukala/sprinkle-oauth/composables'
+import { useGoogleSheets } from '@ssnukala/sprinkle-oauth/composables'
+
+// Import TypeScript interfaces
+import type { OAuthProvider, OAuthConnection, OAuthResult } from '@ssnukala/sprinkle-oauth/interfaces'
+import type { SheetsReadResponse, SheetsAppendRequest } from '@ssnukala/sprinkle-oauth/interfaces'
 
 // Import routes
 import { oauthRoutes } from '@ssnukala/sprinkle-oauth/routes'
@@ -260,9 +274,12 @@ Following UserFrosting 6 patterns and standards:
   - Provider linking/unlinking
 
 - **Service Providers**:
-  - `OAuthServicesProvider` - Registers OAuth services in DI container
-  - `OAuthControllerProvider` - Registers controllers
+  - `OAuthServicesProvider` - Registers all OAuth services and controllers in DI container
   - Follows `ServicesProviderInterface` pattern
+
+- **Google Sheets**:
+  - `GoogleSheetsService` - Read/write Google Sheets with automatic token refresh
+  - `GoogleSheetsController` - REST endpoints for Sheets operations
 
 - **Routes**:
   - `OAuthRoutes` - Implements `RouteDefinitionInterface`
@@ -275,21 +292,137 @@ Following UserFrosting 6 patterns and standards:
 ### OAuth Flow
 
 1. User clicks OAuth provider button
-2. Redirected to provider's authorization page
-3. User authorizes the application
-4. Provider redirects back to callback URL
-5. Application exchanges code for access token
-6. User information is retrieved from provider
-7. User is created or linked based on email
-8. User is logged into UserFrosting
+2. PKCE code_verifier + code_challenge generated and stored in session
+3. Redirected to provider's authorization page (with code_challenge)
+4. User authorizes the application
+5. Provider redirects back to callback URL (or sends postMessage in popup mode)
+6. Application exchanges code for access token (with code_verifier for PKCE verification)
+7. User information is retrieved from provider
+8. User is created or linked based on email
+9. User is logged into UserFrosting
+
+## PKCE (Proof Key for Code Exchange)
+
+This sprinkle implements full PKCE support per OAuth 2.1 specification for defense-in-depth security:
+
+1. During redirect, a cryptographically secure `code_verifier` + `code_challenge` (SHA-256) are generated
+2. The `code_challenge` is sent with the authorization request
+3. The `code_verifier` is stored in the session
+4. During callback, the `code_verifier` is included in the token exchange request
+5. The provider verifies the challenge, preventing authorization code interception attacks
+
+PKCE is automatically applied to all providers (Google, Facebook, Microsoft, LinkedIn) — no configuration required.
+
+## Popup OAuth Flow
+
+OAuth authentication can run in a popup window instead of a full-page redirect:
+
+```typescript
+import { useOAuth } from '@ssnukala/sprinkle-oauth/composables'
+
+const { openOAuthPopup } = useOAuth()
+
+// Opens centered popup window, receives result via postMessage
+const result = await openOAuthPopup('google')
+if (result.success) {
+    // User authenticated
+}
+```
+
+The popup flow:
+1. Opens a centered browser popup (600x700)
+2. OAuth flow runs inside the popup
+3. On completion, result is sent via `window.postMessage()` to the parent window
+4. Popup auto-closes after sending result
+5. Fallback: if popup blocked, falls back to redirect mode
+
+## Google Sheets Integration
+
+Read from and write to Google Sheets using the authenticated user's Google OAuth connection.
+
+### Prerequisites
+
+- Google OAuth configured with Sheets scope (`https://www.googleapis.com/auth/spreadsheets`)
+- User has connected their Google account with offline access (`access_type: offline`)
+
+### Backend API
+
+**Read a Google Sheet:**
+```
+GET /api/oauth/sheets/read?spreadsheet_id=abc123&range=Sheet1!A1:D10
+
+Response:
+{
+  "headers": ["Name", "Email", "Grade", "Status"],
+  "rows": [
+    {"Name": "John", "Email": "john@example.com", "Grade": "K", "Status": "Active"},
+    {"Name": "Jane", "Email": "jane@example.com", "Grade": "1st", "Status": "Active"}
+  ]
+}
+```
+
+**Append rows to a Sheet:**
+```
+POST /api/oauth/sheets/append
+{
+  "spreadsheet_id": "abc123",
+  "range": "Sheet1",
+  "rows": [
+    ["Alice", "alice@example.com", "2nd", "Active"],
+    ["Bob", "bob@example.com", "3rd", "Active"]
+  ]
+}
+```
+
+### Frontend Composable
+
+```typescript
+import { useGoogleSheets } from '@ssnukala/sprinkle-oauth/composables'
+
+const { readSheet, appendToSheet, importAsCSV, exportRows, loading, error } = useGoogleSheets()
+
+// Read sheet data
+const data = await readSheet('spreadsheet-id-or-url', 'Sheet1!A1:D10')
+
+// Convert to CSV for DataChat import
+const csvText = await importAsCSV('spreadsheet-id-or-url', 'Sheet1')
+
+// Export rows to sheet
+await exportRows('spreadsheet-id-or-url', 'Sheet1', rows)
+
+// Append data
+await appendToSheet('spreadsheet-id-or-url', 'Sheet1', [
+    ['Alice', 'alice@example.com', '2nd', 'Active']
+])
+```
+
+### GoogleSheetsService (PHP)
+
+```php
+use UserFrosting\Sprinkle\OAuth\Services\GoogleSheetsService;
+
+// Read sheet data
+$data = $sheetsService->readSheet($spreadsheetId, $range);
+// Returns: ['headers' => [...], 'rows' => [{...}, ...]]
+
+// Append rows
+$result = $sheetsService->appendRows($spreadsheetId, $range, $rows);
+
+// Extract spreadsheet ID from URL
+$id = $sheetsService->extractSpreadsheetId($sheetUrl);
+```
+
+The service automatically handles OAuth token refresh when the access token expires.
 
 ## Security
 
 - CSRF protection via state parameter
+- **PKCE** (Proof Key for Code Exchange) for OAuth 2.1 compliance
 - Secure token storage
 - Foreign key constraints on user relationships
 - Unique constraints to prevent duplicate connections
 - OAuth tokens are hidden from API responses
+- Origin validation for postMessage popup communication
 
 ## Testing
 

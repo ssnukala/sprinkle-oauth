@@ -1,3 +1,14 @@
+<!--
+  OAuth Sprinkle (https://www.userfrosting.com)
+
+  @link      https://github.com/ssnukala/sprinkle-oauth
+  @copyright Copyright (c) 2026 Srinivas Nukala
+  @license   https://github.com/ssnukala/sprinkle-oauth/blob/master/LICENSE.md (MIT License)
+-->
+
+<!-- OAuthConnections.vue -->
+<!-- Displays OAuth provider connection status and allows connecting/disconnecting providers.
+     Uses popup-based OAuth flow via the useOAuth composable for a seamless experience. -->
 <template>
     <div class="oauth-connections-component">
         <div class="card">
@@ -7,34 +18,54 @@
             <div class="card-body">
                 <p class="text-muted">Connect or disconnect OAuth providers for your account</p>
 
+                <!-- Error alert -->
+                <div v-if="oauth.error.value" class="alert alert-danger" role="alert">
+                    {{ oauth.error.value }}
+                </div>
+
                 <div class="list-group">
                     <div
-                        v-for="provider in providers"
+                        v-for="provider in oauth.providers.value"
                         :key="provider.id"
                         class="list-group-item d-flex justify-content-between align-items-center"
                     >
                         <div>
-                            <i :class="[provider.icon, 'fa-lg', 'mr-2']"></i>
+                            <i :class="[provider.icon, 'fa-lg', 'mr-2']" :style="{ color: provider.color }"></i>
                             <strong>{{ provider.name }}</strong>
                         </div>
-                        <div>
-                            <span v-if="isConnected(provider.id)" class="badge badge-success">
+                        <div class="d-flex align-items-center">
+                            <span v-if="oauth.isConnected(provider.id)" class="badge badge-success mr-2">
                                 Connected
                             </span>
+
+                            <!-- Disconnect button -->
                             <button
-                                v-if="isConnected(provider.id)"
-                                class="btn btn-sm btn-danger ml-2"
-                                @click="disconnectProvider(provider.id)"
+                                v-if="oauth.isConnected(provider.id)"
+                                class="btn btn-sm btn-danger"
+                                :disabled="oauth.loading.value && oauth.activeProvider.value === provider.id"
+                                @click="handleDisconnect(provider.id)"
                             >
-                                Disconnect
+                                <span v-if="oauth.loading.value && oauth.activeProvider.value === provider.id">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </span>
+                                <span v-else>Disconnect</span>
                             </button>
-                            <a
+
+                            <!-- Connect button (popup or redirect) -->
+                            <button
                                 v-else
-                                :href="getLinkUrl(provider.id)"
                                 class="btn btn-sm btn-primary"
+                                :disabled="oauth.loading.value"
+                                :style="{ backgroundColor: provider.color, borderColor: provider.color }"
+                                @click="handleConnect(provider.id)"
                             >
-                                Connect
-                            </a>
+                                <span v-if="oauth.loading.value && oauth.activeProvider.value === provider.id">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    <i :class="provider.icon" class="mr-1"></i> Connect
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -44,68 +75,65 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-interface Provider {
-    id: string
-    name: string
-    icon: string
-}
+import { onMounted } from 'vue'
+import { useOAuth } from '../composables/useOAuth'
+import type { OAuthConnection } from '../interfaces'
 
 interface Props {
-    userConnections?: Record<string, any>
+    userConnections?: Record<string, OAuthConnection>
     oauthBaseUrl?: string
+    /** OAuth flow mode: 'popup' or 'redirect' */
+    mode?: 'popup' | 'redirect'
 }
 
 const props = withDefaults(defineProps<Props>(), {
     userConnections: () => ({}),
-    oauthBaseUrl: '/oauth'
+    oauthBaseUrl: '/api/oauth',
+    mode: 'popup',
 })
 
 const emit = defineEmits<{
     (e: 'connection-updated', payload: { provider: string; connected: boolean }): void
 }>()
 
-const providers: Provider[] = [
-    { id: 'google', name: 'Google', icon: 'fab fa-google' },
-    { id: 'facebook', name: 'Facebook', icon: 'fab fa-facebook' },
-    { id: 'linkedin', name: 'LinkedIn', icon: 'fab fa-linkedin' },
-    { id: 'microsoft', name: 'Microsoft', icon: 'fab fa-microsoft' }
-]
+const oauth = useOAuth({
+    apiBaseUrl: props.oauthBaseUrl,
+    mode: props.mode,
+})
 
-const connections = ref({ ...props.userConnections })
+// Initialize connections from props
+onMounted(() => {
+    if (props.userConnections && Object.keys(props.userConnections).length > 0) {
+        oauth.setConnections(props.userConnections)
+    } else {
+        // Fetch from backend if not provided
+        oauth.fetchConnections()
+    }
+})
 
-const isConnected = (providerId: string) => {
-    return !!connections.value[providerId]
+/**
+ * Handle connecting a provider via popup or redirect.
+ */
+async function handleConnect(providerId: string) {
+    try {
+        await oauth.linkProvider(providerId)
+        emit('connection-updated', { provider: providerId, connected: true })
+    } catch {
+        // Error is already set in oauth.error
+    }
 }
 
-const getLinkUrl = (providerId: string) => {
-    return `/api/oauth/link/${providerId}`
-}
-
-const disconnectProvider = async (providerId: string) => {
+/**
+ * Handle disconnecting a provider.
+ */
+async function handleDisconnect(providerId: string) {
     if (!confirm('Are you sure you want to disconnect this provider?')) {
         return
     }
 
-    try {
-        const response = await fetch(`/api/oauth/disconnect/${providerId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-
-        const data = await response.json()
-
-        if (data.success) {
-            delete connections.value[providerId]
-            emit('connection-updated', { provider: providerId, connected: false })
-        } else {
-            alert(data.message || 'Failed to disconnect provider')
-        }
-    } catch (error) {
-        alert('An error occurred while disconnecting')
+    const success = await oauth.disconnectProvider(providerId)
+    if (success) {
+        emit('connection-updated', { provider: providerId, connected: false })
     }
 }
 </script>

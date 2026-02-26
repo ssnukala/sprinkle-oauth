@@ -1,3 +1,14 @@
+<!--
+  OAuth Sprinkle (https://www.userfrosting.com)
+
+  @link      https://github.com/ssnukala/sprinkle-oauth
+  @copyright Copyright (c) 2026 Srinivas Nukala
+  @license   https://github.com/ssnukala/sprinkle-oauth/blob/master/LICENSE.md (MIT License)
+-->
+
+<!-- PageOAuthLogin.vue -->
+<!-- Login page with standard username/password form and OAuth provider buttons.
+     OAuth buttons use popup mode for seamless login without leaving the page. -->
 <template>
     <div class="oauth-login-page">
         <div class="login-box">
@@ -72,37 +83,21 @@
                     <div v-if="enabledProviders.length" class="social-auth-links text-center mb-3 mt-3">
                         <p>- OR -</p>
 
-                        <a
-                            v-if="enabledProviders.includes('google')"
-                            :href="getOAuthUrl('google')"
-                            class="btn btn-block btn-danger mb-2"
+                        <button
+                            v-for="provider in visibleProviders"
+                            :key="provider.id"
+                            class="btn btn-block mb-2"
+                            :class="providerButtonClass(provider.id)"
+                            :disabled="oauth.loading.value"
+                            @click="handleOAuthLogin(provider.id)"
                         >
-                            <i class="fab fa-google mr-2"></i> Sign in with Google
-                        </a>
-
-                        <a
-                            v-if="enabledProviders.includes('facebook')"
-                            :href="getOAuthUrl('facebook')"
-                            class="btn btn-block btn-primary mb-2"
-                        >
-                            <i class="fab fa-facebook mr-2"></i> Sign in with Facebook
-                        </a>
-
-                        <a
-                            v-if="enabledProviders.includes('linkedin')"
-                            :href="getOAuthUrl('linkedin')"
-                            class="btn btn-block btn-info mb-2"
-                        >
-                            <i class="fab fa-linkedin mr-2"></i> Sign in with LinkedIn
-                        </a>
-
-                        <a
-                            v-if="enabledProviders.includes('microsoft')"
-                            :href="getOAuthUrl('microsoft')"
-                            class="btn btn-block btn-secondary mb-2"
-                        >
-                            <i class="fab fa-microsoft mr-2"></i> Sign in with Microsoft
-                        </a>
+                            <span v-if="oauth.loading.value && oauth.activeProvider.value === provider.id">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> Connecting...
+                            </span>
+                            <span v-else>
+                                <i :class="provider.icon" class="mr-2"></i> Sign in with {{ provider.name }}
+                            </span>
+                        </button>
                     </div>
 
                     <!-- Additional Links -->
@@ -119,7 +114,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useOAuth } from '../composables/useOAuth'
 
 interface Props {
     siteTitle?: string
@@ -129,6 +125,8 @@ interface Props {
     registerUrl?: string
     enabledProviders?: string[]
     oauthBaseUrl?: string
+    /** OAuth flow mode: 'popup' or 'redirect' */
+    oauthMode?: 'popup' | 'redirect'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -138,7 +136,8 @@ const props = withDefaults(defineProps<Props>(), {
     forgotPasswordUrl: '/account/forgot-password',
     registerUrl: '/account/register',
     enabledProviders: () => [],
-    oauthBaseUrl: '/oauth'
+    oauthBaseUrl: '/api/oauth',
+    oauthMode: 'popup',
 })
 
 const username = ref('')
@@ -146,18 +145,44 @@ const password = ref('')
 const remember = ref(false)
 const alerts = ref<Array<{ type: string; message: string }>>([])
 
-const handleLogin = async () => {
+const oauth = useOAuth({
+    apiBaseUrl: props.oauthBaseUrl,
+    mode: props.oauthMode,
+})
+
+/**
+ * Filter provider definitions to only show enabled ones.
+ */
+const visibleProviders = computed(() =>
+    oauth.providers.value.filter(p => props.enabledProviders.includes(p.id))
+)
+
+/**
+ * Get Bootstrap button class for a provider.
+ */
+function providerButtonClass(providerId: string): string {
+    const classes: Record<string, string> = {
+        google: 'btn-danger',
+        facebook: 'btn-primary',
+        linkedin: 'btn-info',
+        microsoft: 'btn-secondary',
+    }
+    return classes[providerId] || 'btn-default'
+}
+
+/**
+ * Handle standard login form submission.
+ */
+async function handleLogin() {
     try {
         const response = await fetch(props.loginUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 username: username.value,
                 password: password.value,
-                remember: remember.value
-            })
+                remember: remember.value,
+            }),
         })
 
         if (response.ok) {
@@ -166,19 +191,39 @@ const handleLogin = async () => {
             const data = await response.json()
             alerts.value.push({
                 type: 'danger',
-                message: data.message || 'Login failed'
+                message: data.message || 'Login failed',
             })
         }
-    } catch (error) {
+    } catch {
         alerts.value.push({
             type: 'danger',
-            message: 'An error occurred during login'
+            message: 'An error occurred during login',
         })
     }
 }
 
-const getOAuthUrl = (provider: string) => {
-    return `/api/oauth/${provider}`
+/**
+ * Handle OAuth login via popup or redirect.
+ */
+async function handleOAuthLogin(provider: string) {
+    alerts.value = [] // Clear previous alerts
+
+    try {
+        const result = await oauth.login(provider)
+
+        if (result?.success) {
+            // Redirect to dashboard or the URL returned by the backend
+            window.location.href = result.redirect || '/'
+        }
+    } catch (err: any) {
+        // Don't show error if user just closed the popup
+        if (err.message !== 'OAuth popup was closed') {
+            alerts.value.push({
+                type: 'danger',
+                message: err.message || 'OAuth login failed',
+            })
+        }
+    }
 }
 </script>
 
